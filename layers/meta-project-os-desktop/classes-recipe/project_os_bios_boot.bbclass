@@ -11,10 +11,13 @@ PROJECT_OS_BIOS_BOOT_SCRIPT = "${PROJECT_OS_DESKTOP_LAYERDIR}/files/bios/project
 
 # Modules built into core.img: BIOS disks, GPT, FAT (the EFI partition), the menu
 # language and the commands used by project-os-grub.cfg on BIOS (load_env/save_env,
-# linux/initrd, tests, echo). Nothing is loaded from disk: the EFI partition has no
-# i386-pc module directory.
+# linux/initrd, tests, echo), and the graphical menu with its theme (fonts, PNG images,
+# step 5b, D-060) on the BIOS's VESA video modes (vbe; not all_video, whose drivers for
+# QEMU's video cards bypass the firmware). Nothing is loaded from disk: the EFI partition
+# has no i386-pc module directory.
 PROJECT_OS_BIOS_GRUB_MODULES = "\
     biosdisk part_gpt fat normal configfile echo test loadenv linux minicmd search \
+    font gfxterm gfxterm_background gfxmenu png vbe \
 "
 # grub.cfg and grubenv on the EFI partition, the second partition of the boot disk
 # (empty device name: the disk the BIOS booted from)
