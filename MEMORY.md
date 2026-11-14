@@ -1259,7 +1259,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     an error.
 
 
-### D-058 — Data unlocking with password and recovery key, 3 boot attempts per slot (step 4d) · `proposed` (the user's choices, 2026-11-14)
+### D-058 — Data unlocking with password and recovery key, 3 boot attempts per slot (step 4d) · `confirmed` (the user's choices and approval, 2026-11-14)
 - **What the user chose:** the password is set **by a command after the first boot**,
   until the setup of Phase 8 exists; the **TPM is postponed to Phase 8**, together with
   Secure Boot; the **development image behaves like the release** (it asks the
@@ -1402,7 +1402,7 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today `build/data-unlock`). New steps and updates
+a time**, the one open for review (today none: the next one is opened for step 4e). New steps and updates
 to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several
