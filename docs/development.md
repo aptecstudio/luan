@@ -24,7 +24,7 @@ If your PC already runs Linux (Ubuntu or Debian), you can work directly there.
 
 **Laptop or PC with few resources** (about 8 GB of RAM, 4 cores and 45 GB free): enough
 for the Phase 1 image, with the `--low-resources` mode (section 3). It will not be
-enough from Phase 2 on, when WebKitGTK is compiled.
+enough from Phase 2 on, when WPE WebKit and Skia are compiled.
 
 ## 2. Download the project and prepare the machine
 
@@ -34,9 +34,16 @@ cd project-os
 tools/setup-host.sh
 ```
 
-`setup-host.sh` installs the programs for Yocto, kas, QEMU and the UEFI firmware, and
-creates the **development keys** to sign updates in `~/.config/project-os/keys`
-(outside the repository). It asks for confirmation before changing system settings.
+`setup-host.sh` installs the programs for Yocto, kas, QEMU and the UEFI firmware, the
+code style tools and the branding tools, and creates the **development keys** to sign
+updates in `~/.config/project-os/keys` (outside the repository). It asks for
+confirmation before changing system settings (`--yes` answers for you). At the end it
+checks every tool and lists what is missing; the full list of packages is in
+[`README.md`](../README.md#1-install-the-dependencies).
+
+Clone the project into a **Linux file system** (ext4, btrfs, xfs), for example your home
+directory: on NTFS, FAT or exFAT disks shared with Windows, or on network shares, the
+build fails. The script warns if the repository is in such a place.
 
 When it finishes, log out and back in (or open a new terminal).
 
@@ -78,6 +85,10 @@ kas build kas/desktop-amd64.yml:kas/dev.yml                          # default
 kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml    # low resources
 ```
 
+**Code style.** Before committing a change, run `tools/lint.sh`: it checks shell
+scripts (ShellCheck), Python (ruff) and BitBake recipes (oelint-adv) with the
+conventions of `AGENTS.md` §7, and later Rust, Luau and JavaScript too.
+
 ## 4. Test the image in the emulator
 
 ```sh
@@ -95,8 +106,8 @@ What to expect today:
 4. text login: user `root`, no password (development configuration only); on the
    terminal console the login is automatic.
 
-There is no graphical interface yet: it comes with Phases 2 (WebKit and compositor) and
-5 (shell).
+There is no graphical interface yet: it comes with Phases 2 (graphics framework and
+compositor) and 5 (shell).
 
 **Testing an update.** `tools/build.sh update` produces the signed bundle in
 `build/tmp/deploy/images/project-os-amd64/`. Inside the emulator, download it (for
@@ -109,7 +120,9 @@ other copy, and goes back to the previous one by itself if the boot does not com
 - **Data is not protected:** the data partition uses an empty key until the setup
   exists (ROADMAP, step 4d).
 - **BIOS boot** not available yet: UEFI only (step 4e).
-- **Changes to `/etc`** (network, users) do not survive a reboot (step 4c).
+- **Changes to `/etc`** (network, users, host name) are kept on the encrypted data
+  partition and survive reboots and updates; if an update changes a file you edited,
+  your version is kept and the file is listed in `/var/lib/project-os/etc-conflicts`.
 - **Android / mobile emulator:** not yet, it comes with Phase 7.
 
 ## 6. If something goes wrong
@@ -119,6 +132,11 @@ other copy, and goes back to the previous one by itself if the boot does not com
 - **Build stopped with an error:** copy the last lines of the terminal and, if given,
   the log file named in the error (in `build/tmp/work/...`). The build host's system
   and the output of `git log -1` are useful too.
+- **`setup-host.sh` ends with "Setup incomplete":** the list shows what is missing; run
+  it again after fixing the cause (network, `sudo` rights), it keeps what is done.
+- **Errors about permissions, links or "dubious ownership" from git:** the repository is
+  probably on an NTFS/FAT disk or owned by another user. Clone it again into your home
+  directory.
 - **Error about namespaces or "unshare":** run `tools/setup-host.sh` again and accept
   the AppArmor change (see the explanation in the script).
 - **Error about the keys:** check that `~/.config/project-os/keys/ca.cert.pem` exists,
@@ -137,5 +155,6 @@ other copy, and goes back to the previous one by itself if the boot does not com
 | `kas/` | build configuration |
 | `layers/` | Yocto recipes: distribution, image, machine, kernel, boot |
 | `branding/` | placeholder logo and boot menu theme |
-| `tools/` | scripts from this guide and checking tools |
+| `tools/` | scripts from this guide and checking tools (`lint.sh` for the code style) |
+| `ruff.toml`, `.shellcheckrc`, `tools/oelint-constants.json` | settings of the style checks |
 | `build/`, `sources/` | created by the build, not versioned |
