@@ -24,8 +24,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** review of step 4e (D-059) on the `build/bios-boot` branch; then 5b, and
-the real hardware test session (step 6) with all the hardware checks together.
+**Next step:** 5b (GRUB theme recipe and `os-prober`); then the real hardware test
+session (step 6) with all the hardware checks together.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 

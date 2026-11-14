@@ -1328,7 +1328,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     `B_LEFT=3`; B interrupted at the prompt 3 times → A at the fourth boot (`B_TRY=1`,
     `B_LEFT=0`), system `running`, EFI partition clean.
 
-### D-059 — BIOS boot with GRUB in the same disk image (step 4e) · `proposed` (2026-11-14)
+### D-059 — BIOS boot with GRUB in the same disk image (step 4e) · `confirmed` (the user's approval, 2026-11-14)
 - **What:** the disk that boots from UEFI also boots from a legacy BIOS (R-26), with the
   same `grub.cfg`, `grubenv`, slots and boot files on the EFI partition.
   `project_os_bios_boot.bbclass` runs `files/bios/project-os-bios-boot` at the end of
