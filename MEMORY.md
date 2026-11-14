@@ -1240,6 +1240,23 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Why:** other developers must be able to prepare a machine without help; the
   dependencies were partly implicit (branding tools, `python3-venv`) and an NTFS
   checkout failed only hours into the build.
+- **Checks done (2026-11-14), on the user's second PC** (Debian 13, Intel i5-3470,
+  4 cores, 7 GB of RAM, repository cloned again on ext4):
+  - the script installed everything; its final checks all pass (19 commands, Python
+    modules, `en_US.UTF-8`, OVMF, Inter, keys); `tools/lint.sh` clean;
+  - first build from zero there, of `main` (before the script was run): 3809 tasks,
+    about 3 hours in low-resources mode, no errors; then the build of this branch
+    reused 3647 of its 3966 tasks (about 50 minutes, mostly the kernel) and the
+    update bundle;
+  - full QEMU test (§5), with the window visible: new disk on slot A (erofs root
+    verified by dm-verity, `/etc` overlay, UKI with the slot's profile, system
+    `running`, no failed units, about 81 MB of RAM in use), update to slot B
+    confirmed by `rauc-mark-good`, a file written in `/etc` on A still there on B,
+    boot of B interrupted by a reset 3 s after GRUB started it → automatic rollback
+    to A (B marked bad), EFI partition clean;
+  - seen on a new disk only: `rauc` logs "No bootable slot found in ORDER 'A B'"
+    until the first update, because slot B is still empty (`B_OK=0`); expected, not
+    an error.
 
 ---
 
