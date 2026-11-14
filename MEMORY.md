@@ -1211,7 +1211,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   stays outside the repository (AGENTS.md §4).
 - **Why:** R-42: users must be able to install project-os without building it.
 
-### D-057 — One-command setup of a build host · `proposed` (the user's request, 2026-11-14)
+### D-057 — One-command setup of a build host · `confirmed` (the user's request and approval, 2026-11-14)
 - **What:** `tools/setup-host.sh` (D-028) is the only command a developer runs on a new
   Debian 13 or Ubuntu 24.04/26.04 machine to install everything the repository needs:
   - apt: the Yocto 6.0 host packages (Reference Manual list, `lz4` for
