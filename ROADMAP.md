@@ -24,8 +24,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4e (BIOS boot with GRUB in the same image) on a new branch; then
-5b, and the real hardware test session (step 6) with all the hardware checks together.
+**Next step:** 5b (GRUB theme recipe and `os-prober`); then the real hardware test
+session (step 6) with all the hardware checks together.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 
@@ -96,7 +96,7 @@ with boot menu, A/B partitions and full hardware support.
         test in step 6
   - [x] 3b. Intel microcode recipe, early microcode loading (with step 4c.1, D-043);
         real check in step 6.17
-- [ ] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
+- [x] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
   - [x] 4b. Slot selection in GRUB and signed RAUC updates
@@ -115,7 +115,9 @@ with boot menu, A/B partitions and full hardware support.
         `project-os-data-key`; memory of the key derivation limited for old PCs; 3
         boot attempts per slot, so a PC switched off at the password prompt does not
         fall back (D-058). TPM as an extra method in Phase 8
-  - [ ] 4e. BIOS boot with GRUB in the same image (R-26)
+  - [x] 4e. BIOS boot with GRUB in the same image (R-26): `boot.img` and `core.img`
+        written after wic, same menu and slots as UEFI, `tools/run-qemu.sh --bios`
+        (D-059); real BIOS and CSM firmwares in step 6.2
 - [ ] 5. GRUB boot menu (D-009):
   - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
   - [ ] 5b. Yocto recipe: `.pf2` fonts, theme installation, `os-prober` to detect
@@ -180,10 +182,13 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
+- [ ] On BIOS the kernel's decompressor prints its messages before the password prompt
+      despite `quiet` (D-059); look at it with the boot look of step 5b
 - [ ] Remove from the slot the unused `/boot/EFI/BOOT` files of the `grub-efi` package
       (D-048)
-- [ ] Update GRUB and `grub.cfg` on the EFI partition with RAUC (today only the slots
-      and their boot files are updated, D-048)
+- [ ] Update GRUB and `grub.cfg` on the EFI partition with RAUC, and GRUB's BIOS code
+      (`boot.img`, `core.img`); today only the slots and their boot files are updated
+      (D-048, D-059)
 - [ ] Size budget: the NVIDIA firmware for nouveau (GSP) is 109 MB of the image, keep
       only the versions the kernel loads (D-041 review); the initramfs is 18.9 MB
       compressed because of systemd's hard dependencies (D-043)

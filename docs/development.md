@@ -95,6 +95,7 @@ conventions of `AGENTS.md` §7, and later Rust, Luau and JavaScript too.
 tools/run-qemu.sh            # graphical window, plus the console in the terminal
 tools/run-qemu.sh --text     # everything in the terminal; to quit: Ctrl-a then x
 tools/run-qemu.sh --reset    # start again from a new disk, copied from the latest build
+tools/run-qemu.sh --bios     # the same disk started from a legacy BIOS instead of UEFI
 ```
 
 What to expect today:
@@ -136,7 +137,6 @@ layout at that prompt is the US one, like the system's console.
   partition stays unprotected until `project-os-data-key setup` is run; the empty key
   also adds about 2 s to every boot after the setup (D-058). No TPM unlocking yet
   (Phase 8).
-- **BIOS boot** not available yet: UEFI only (step 4e).
 - **Changes to `/etc`** (network, users, host name) are kept on the encrypted data
   partition and survive reboots and updates; if an update changes a file you edited,
   your version is kept and the file is listed in `/var/lib/project-os/etc-conflicts`.

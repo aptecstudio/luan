@@ -1,25 +1,27 @@
 #!/bin/sh
-# Boots the project-os desktop image in the QEMU emulator, with UEFI firmware.
+# Boots the project-os desktop image in the QEMU emulator, with UEFI firmware (or BIOS).
 #
-# Usage: tools/run-qemu.sh [--reset] [--text]
+# Usage: tools/run-qemu.sh [--reset] [--text] [--bios]
 #   --reset   start again from a new disk, copied from the latest build (loses data)
 #   --text    no graphical window: everything in the terminal (serial console)
+#   --bios    start the same disk from a legacy BIOS (SeaBIOS) instead of UEFI
 #
 # The emulator disk is a copy of the image in build/qemu/disk.img, with 16 GB of extra
 # free space: on first boot systemd-repart creates the data partition there.
 # To quit in --text mode: Ctrl-a then x.
-#
-# BIOS boot: not available yet (ROADMAP, step 4e).
+# With --bios, GRUB and the password prompt are only on the screen, not in the terminal.
 set -eu
 
 cd "$(dirname "$0")/.."
 
 reset=0
 text_mode=0
+bios=0
 for arg in "$@"; do
     case "$arg" in
         --reset) reset=1 ;;
         --text) text_mode=1 ;;
+        --bios) bios=1 ;;
         *) echo "Unknown option: $arg" >&2; exit 2 ;;
     esac
 done
@@ -85,11 +87,18 @@ else
     DISPLAY_ARGS="-vga std -serial mon:stdio"
 fi
 
+# Firmware: OVMF (UEFI) with its variables, or QEMU's default SeaBIOS (no flash drives)
+if [ "$bios" -eq 1 ]; then
+    FIRMWARE_ARGS=""
+else
+    FIRMWARE_ARGS="-drive if=pflash,format=raw,readonly=on,file=$CODE
+        -drive if=pflash,format=raw,file=$VARS"
+fi
+
 # shellcheck disable=SC2086
 exec qemu-system-x86_64 \
     -machine q35,accel="$ACCEL" -cpu "$CPU" -smp 2 -m 2048 \
-    -drive if=pflash,format=raw,readonly=on,file="$CODE" \
-    -drive if=pflash,format=raw,file="$VARS" \
+    $FIRMWARE_ARGS \
     -drive if=none,id=system,format=raw,file="$DISK" \
     -device nvme,serial=projectos0,drive=system \
     -nic user,model=e1000e \

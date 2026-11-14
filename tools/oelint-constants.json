@@ -15,7 +15,8 @@
             "RAUC_BUNDLE_VERSION",
             "RAUC_KEYRING_FILE",
             "RAUC_SLOT_rootfs",
-            "VOLATILE_BINDS"
+            "VOLATILE_BINDS",
+            "do_image_wic"
         ]
     }
 }
