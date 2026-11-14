@@ -2,9 +2,10 @@ SUMMARY = "project-os desktop — data partition, persistent /etc, EFI partition
 DESCRIPTION = "Data partition: created on first boot (systemd-repart), unlocked \
                (crypttab) and mounted on /var by the initramfs, which also mounts the \
                persistent /etc overlay on it (package project-os-storage-initrd). In \
-               the system: partition definition, /etc conflict report after updates, \
-               checking and mounting of the EFI partition on /efi (D-026, D-038, \
-               D-044)."
+               the system: partition definition, password and recovery key of the \
+               data partition (project-os-data-key), /etc conflict report after \
+               updates, checking and mounting of the EFI partition on /efi (D-026, \
+               D-038, D-044, D-058)."
 HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec6d293b95dea7b07891"
@@ -15,6 +16,7 @@ SRC_URI = "\
     file://50-data.conf \
     file://efi.mount \
     file://etc-overlay-conflicts \
+    file://project-os-data-key \
     file://initrd/crypttab \
     file://initrd/10-after-repart.conf \
     file://initrd/project-os-repart.service \
@@ -41,6 +43,10 @@ do_install() {
 
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${UNPACKDIR}/efi.mount ${D}${systemd_system_unitdir}/
+
+    # Password and recovery key of the data partition (step 4d)
+    install -d ${D}${sbindir}
+    install -m 0755 ${UNPACKDIR}/project-os-data-key ${D}${sbindir}/
 
     # Run by RAUC after installing an update (post-install handler, rauc-conf)
     install -d ${D}${nonarch_libdir}/project-os
@@ -87,11 +93,13 @@ FILES:${PN} += "\
 "
 
 # System:
-#   cryptsetup   key management of the data partition (password and recovery key,
-#                step 4d)
-#   dosfstools   fsck.vfat, which systemd-fsck uses to check the EFI partition
-#   busybox      sh, find, cmp, mount for etc-overlay-conflicts
-RDEPENDS:${PN} = "busybox cryptsetup dosfstools systemd"
+#   busybox        sh, find, cmp, mount for etc-overlay-conflicts; sh, awk, stty, cmp,
+#                  mktemp for project-os-data-key
+#   cryptsetup     password keyslots of the data partition, with a memory limit for
+#                  the key derivation (project-os-data-key, step 4d)
+#   dosfstools     fsck.vfat, which systemd-fsck uses to check the EFI partition
+#   systemd-crypt  systemd-cryptenroll: recovery key of the data partition
+RDEPENDS:${PN} = "busybox cryptsetup dosfstools systemd systemd-crypt"
 # initramfs:
 #   e2fsprogs-mke2fs   mkfs.ext4, which systemd-repart uses to format the data partition
 #   e2fsprogs-e2fsck   fsck of the data partition before mounting it

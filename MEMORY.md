@@ -328,9 +328,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   | 4 | `root_b` | 4 GiB | system, copy B, written by updates |
   | 5 | `data` | rest | data, created on first boot, encrypted, mounted on `/var` (`/home` → `/var/home`) by the initramfs (D-044) |
 - **Slot selection:** GRUB (`files/wic/project-os-grub.cfg`) boots the first valid slot
-  of `ORDER` without pending attempts, and records the attempt; `rauc-mark-good`
-  confirms it once the system is up. If the boot fails, on reboot it switches to the
-  other slot. In the menu the active slot is called "project-os", the other one
+  of `ORDER` that has not been given up; every slot has 3 boot attempts (D-058), and
+  `rauc-mark-good` gives them back once the system is up. After 3 boots that did not
+  complete, it switches to the other slot. In the menu the active slot is called "project-os", the other one
   "project-os (previous version)". `grubenv` values are `1`/`0`, like RAUC's reference
   layout: RAUC writes them that way, and `true`/`false` made every slot unbootable after
   the first update (found in QEMU).
@@ -804,9 +804,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   with all local changes and keeps the local `/etc/issue`; interrupted boot of B →
   rollback to A with all changes. Slot 665 MB, initramfs 19.3 MB, idle memory about
   81 MB.
-- **Seen, for step 4d:** on first boot the LUKS2 key derivation (Argon2id) of
-  systemd-repart used up to 893 MB of RAM (2 GB VM): on old PCs with little memory
-  (R-25) the memory cost must be limited when the password is set.
+- **Memory of the key derivation:** the empty key that systemd-repart creates uses
+  Argon2i with up to 893 MB of RAM (2 GB VM); it is removed when the password is set,
+  and the password's derivation has a memory limit for old PCs (R-25, D-058).
 - **Discarded alternatives:** keeping repart and unlocking in the system and mounting
   the overlay later (programs read `/etc` from the first moment); one mount unit for
   the overlay (its directories must exist first, a mount unit cannot create them).
@@ -902,7 +902,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Corrupted block:** dm-verity's default answer, a read error. A system file that
   does not match the tree is not run; the boot stops, and `systemd.crash_action=reboot`
   (the user's choice) restarts the PC after 10 s when PID 1 cannot go on, so GRUB moves
-  to the other slot by itself (attempt still recorded). Discarded: staying frozen with
+  to the other slot by itself after the slot's 3 attempts (D-058). Discarded: staying frozen with
   the message on screen (a PC far from its user would wait forever).
 - **Boot menu tracked by the build:** `grub.cfg` reaches wic only through the
   `bootloader --configfile` line, which bitbake does not track; the machine adds the
@@ -1258,6 +1258,72 @@ Set by the user (2026-11-11 to 2026-11-13).
     until the first update, because slot B is still empty (`B_OK=0`); expected, not
     an error.
 
+
+### D-058 — Data unlocking with password and recovery key, 3 boot attempts per slot (step 4d) · `confirmed` (the user's choices and approval, 2026-11-14)
+- **What the user chose:** the password is set **by a command after the first boot**,
+  until the setup of Phase 8 exists; the **TPM is postponed to Phase 8**, together with
+  Secure Boot; the **development image behaves like the release** (it asks the
+  password too); every slot gets **3 boot attempts**, given back at every boot that
+  completes.
+- **`project-os-data-key`** (`project-os-storage`, POSIX sh): `status`, `setup`,
+  `password`, `recovery-key`.
+  - `setup`: recovery key from `systemd-cryptenroll --recovery-key` (unlocking with the
+    empty key), shown and typed back to confirm it was saved (dashes, spaces and case
+    ignored); password asked twice, at least 8 characters, added with
+    `cryptsetup luksAddKey` (Argon2id, memory a quarter of the RAM, at most 1 GiB:
+    505 MB in a 2 GB VM instead of up to 893 MB, D-044); both keys checked with
+    `cryptsetup open --test-passphrase`, **then** the empty key is removed. If the setup
+    stops before that, the new recovery key is removed, so it can be run again.
+  - `password` accepts the current password or the recovery key; `recovery-key` asks
+    the password. The new key is checked before the old one is removed.
+  - Secrets only in a private directory in `/run` (RAM), removed on exit; key files
+    without a final newline (a key file is used byte by byte: the recovery key printed
+    with its newline was refused).
+  - Why the checks before every removal: `systemd-cryptenroll --wipe-slot` removed the
+    empty key even with a wrong unlock key (seen in QEMU), which would leave the data
+    with keys nobody knows.
+- **At boot:** unchanged `crypttab` in the initramfs (`try-empty-password=yes`, then
+  `systemd-ask-password` on the screen console): the prompt accepts the password or
+  the recovery key and asks again after a wrong one. Keyboard layout: US, like the
+  system's console (`/etc/vconsole.conf` is on the encrypted partition, so the
+  initramfs cannot read a local choice); the recovery key types the same on every
+  layout. The layout chosen in the setup (Phase 8) must reach the initramfs.
+- **Cost of the empty-key try:** after the setup, trying the empty key costs one
+  Argon2id derivation of the password slot, about 1.9 s at every boot (QEMU). Kept
+  while the partition is created with an empty key; to be removed when the setup of
+  Phase 8 creates it with the password.
+- **3 boot attempts per slot** (`project-os-grub.cfg`, `X_LEFT` in `grubenv`): GRUB uses
+  one attempt at every boot of a slot; the third sets `X_TRY=1` and the slot is given
+  up after it. `rauc-mark-good` clears `X_TRY` and `project-os-boot-attempts`
+  (`ExecStartPost`, `rauc-conf`) puts `X_LEFT` back to 3. An empty or `0` count with
+  `X_TRY=0`, as after an installation, counts as 3. Why: with one attempt, a PC
+  switched off at the password prompt fell back to the previous version and the
+  newer slot was never tried again (seen in QEMU); a corrupted slot still falls back,
+  after 3 restarts (D-047). Like systemd-boot's boot counting.
+- **Discarded:** asking the password in the initramfs on first boot, before the data
+  partition is created (the user chose the command); TPM unlocking now (without Secure
+  Boot the boot chain is not signed end to end); an empty key only in development
+  images (the release path would be tested less); counting attempts only for slots
+  not yet confirmed (a corrupted confirmed slot would restart forever, against D-047);
+  confirming the slot in the initramfs before the password (failures after the
+  password would no longer roll back); re-encrypting the partition at setup (data
+  written before the setup stays readable to whoever copied the disk in that time:
+  hours of rewriting for a case the Phase 8 setup removes).
+- **Checks done (QEMU, 2026-11-14, window visible; the password prompt is on the screen
+  console, so the tests type on it with QEMU's `sendkey`):**
+  - new disk: `status` reports the partition not protected; `setup` refuses a wrong
+    recovery key, a password shorter than 8 characters and two different passwords,
+    then leaves one password (Argon2id, 505 MB) and one recovery key (PBKDF2, as
+    systemd-cryptenroll sets it for a random key); a second `setup` is refused;
+    nothing left in `/run`;
+  - boot: a wrong password and then the right one; the recovery key at the prompt;
+    `password` with the recovery key as the current key, `recovery-key` refusing the
+    old password: afterwards the old password and the old recovery key no longer
+    open the partition, the new ones do;
+  - boot attempts: a reset at the password prompt keeps the slot (A again at the next
+    boot, `A_LEFT` back to 3 after the login); update to B, B confirmed with
+    `B_LEFT=3`; B interrupted at the prompt 3 times → A at the fourth boot (`B_TRY=1`,
+    `B_LEFT=0`), system `running`, EFI partition clean.
 ---
 
 ## 3. Visual style
@@ -1325,7 +1391,7 @@ depends on what the change touches:
 
 | The change touches… | Test |
 |---|---|
-| GRUB, partitions, RAUC, initramfs, kernel command line, mounts at boot | boot from a new disk + A/B update to slot B + interrupted boot of B with automatic rollback to A |
+| GRUB, partitions, RAUC, initramfs, kernel command line, mounts at boot | boot from a new disk + A/B update to slot B + boot of B interrupted 3 times (its attempts, D-058) with automatic rollback to A |
 | only packages or files inside the system (firmware, programs, configuration) | boot from a new disk and checks of the system (`running`, no failed units, the change in place) |
 
 Why the full test for the boot chain: slot B comes from a different file (the update
@@ -1336,7 +1402,7 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today `build/verified-boot`). New steps and updates
+a time**, the one open for review (today none: the next one is opened for step 4e). New steps and updates
 to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several

@@ -113,12 +113,29 @@ compositor) and 5 (shell).
 `build/tmp/deploy/images/project-os-amd64/`. Inside the emulator, download it (for
 example from a local web server on the build host, which QEMU reaches at `10.0.2.2`)
 and install it with `rauc install <file>.raucb`: on reboot the system starts from the
-other copy, and goes back to the previous one by itself if the boot does not complete.
+other copy, and goes back to the previous one by itself if 3 boots in a row do not
+complete.
+
+**Protecting the data.** The data partition is created with an empty key, so at first
+it is not protected. Inside the system, run:
+
+```sh
+project-os-data-key setup          # recovery key, then password; removes the empty key
+project-os-data-key status         # which keys open the data partition
+project-os-data-key password       # change the password (or set a new one with the recovery key)
+project-os-data-key recovery-key   # replace the recovery key
+```
+
+From the next boot the password is asked on the screen (in the QEMU window, not in the
+`--text` terminal); the recovery key is accepted at the same prompt. The keyboard
+layout at that prompt is the US one, like the system's console.
 
 ## 5. Current limitations
 
-- **Data is not protected:** the data partition uses an empty key until the setup
-  exists (ROADMAP, step 4d).
+- **Data protection by command:** until the setup of Phase 8 exists, the data
+  partition stays unprotected until `project-os-data-key setup` is run; the empty key
+  also adds about 2 s to every boot after the setup (D-058). No TPM unlocking yet
+  (Phase 8).
 - **BIOS boot** not available yet: UEFI only (step 4e).
 - **Changes to `/etc`** (network, users, host name) are kept on the encrypted data
   partition and survive reboots and updates; if an update changes a file you edited,
