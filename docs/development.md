@@ -96,12 +96,14 @@ tools/run-qemu.sh            # graphical window, plus the console in the termina
 tools/run-qemu.sh --text     # everything in the terminal; to quit: Ctrl-a then x
 tools/run-qemu.sh --reset    # start again from a new disk, copied from the latest build
 tools/run-qemu.sh --bios     # the same disk started from a legacy BIOS instead of UEFI
+tools/run-qemu.sh --with-disk=other.img   # a second disk, e.g. with another system
 ```
 
 What to expect today:
 
-1. GRUB boot menu with the "project-os" entry, booted automatically after 5 seconds
-   (text menu: the graphical theme comes in step 5b);
+1. GRUB boot menu with the project-os theme and the "project-os" entry, booted
+   automatically after 5 seconds; from UEFI, Windows and the other known systems found
+   on the disks get their own entry;
 2. kernel and systemd start;
 3. on **first boot**, the encrypted data partition is created in the free space;
 4. text login: user `root`, no password (development configuration only); on the

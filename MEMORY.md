@@ -91,9 +91,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   existing compositor (little control over animations).
 
 ### D-009 — Desktop boot menu: GRUB 2 with own theme · `confirmed` (2026-11-11)
-- **What:** GRUB 2 (UEFI) with a project-os theme: centered menu, logo at the top, own
-  background and fonts. Detection of Windows and other systems with `os-prober` (to be
-  re-enabled with `GRUB_DISABLE_OS_PROBER=false`).
+- **What:** GRUB 2 (UEFI, and BIOS with the same disk, D-059) with a project-os theme:
+  centered menu, logo at the top, own background and fonts (D-023, in the image since
+  D-060). Windows and other systems are found by GRUB itself at every boot (D-060).
 - **Secure Boot:** with no upstream distribution there is no `shim` already signed by
   Microsoft. Initial phase: project-os keys enrolled by the user
   (MOK) during installation; getting a shim signed by Microsoft is a long-term goal.
@@ -261,8 +261,9 @@ Set by the user (2026-11-11 to 2026-11-13).
     `rsvg-convert`, background and boxes with Pillow/NumPy); `branding/previews/`
     holds an approximate preview, which does not go into the image.
 - **Font:** Inter (OFL‑1.1 license). The `.pf2` files for GRUB are not in the
-  repository: the Yocto recipe will download Inter from the official project and
-  generate them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28).
+  repository: the `project-os-grub-theme` recipe downloads Inter from the official
+  project and makes them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28;
+  D-060).
 - **Background:** ordered dithering instead of noise, to avoid color banding with a
   light PNG (224 KB against 1.6 MB).
 - **Menu texts:** English (D-037); the localization of the boot menu is to be decided
@@ -1353,14 +1354,12 @@ Set by the user (2026-11-11 to 2026-11-13).
   their working directory and fail on an image file in the build: "failed to get
   canonical path", "disk does not exist"); a wic source plugin (more code bound to wic
   internals for the same few writes); copying the i386-pc module directory to the EFI
-  partition (about 600 files; built-in modules are enough until the theme of step 5b,
-  which adds `gfxterm`, `font`, `png` and the video modules); the work in the class
+  partition (about 600 files; built-in modules are enough, the theme's ones too,
+  D-060); the work in the class
   itself (BitBake's shell parser does not accept arithmetic expansion: the build stopped
   at parsing). Reed-Solomon codes left out (`--no-rs-codes` behaviour): they only help
   recover a `core.img` damaged on disk.
-- **Still open:** on BIOS the kernel's decompressor prints its messages ("early console
-  in extract_kernel"…) before the password prompt, despite `quiet`; to be looked at with
-  the boot look of step 5b. Updates do not rewrite `boot.img` and `core.img` yet (with
+- **Still open:** updates do not rewrite `boot.img` and `core.img` yet (with
   GRUB and `grub.cfg` on the EFI partition, ROADMAP). Real BIOS and CSM firmwares in the
   hardware session (step 6.2): some old BIOSes boot a GPT disk only if the protective
   MBR entry is marked active.
@@ -1372,6 +1371,73 @@ Set by the user (2026-11-11 to 2026-11-13).
   password prompt (screenshots) → A at the fourth boot, `B_TRY=1`, EFI partition clean.
   Then a new disk of the same image from UEFI: slot A, system `running`. The disk made
   by the script is identical, byte for byte, to the one first tested by hand.
+### D-060 — Boot menu theme in the image, other systems found by GRUB (step 5b) · `confirmed` (the user's approval, 2026-11-14)
+- **What:**
+  - `project-os-grub-theme` recipe: the theme of `branding/grub-theme` (D-023, single
+    source, read from outside the layer) with the Inter 4.1 fonts of the official
+    release converted to `.pf2` by `grub-mkfont` (Regular 14 and 18, Medium 18,
+    SemiBold 28), only ASCII, Latin-1, Latin Extended-A, punctuation and arrows;
+    Inter's OFL license next to them. Deployed and copied by wic to
+    `EFI/BOOT/themes/project-os` on the EFI partition, where `grub.cfg` already looked.
+  - `grub-mkfont` enabled only in `grub-native` (bbappend, with `freetype-native`): the
+    GRUB of the image does not change, nothing is added to the system.
+  - `grub-mkfont` names a font "<name> <style> <size>" and reads the style only from the
+    bold and italic flags, so the Medium and SemiBold files are named "Inter Medium
+    Regular 18" and "Inter SemiBold Regular 28" in `theme.txt`.
+  - `grub.cfg` loads the four fonts by name (the old `*.pf2` loop would have loaded
+    nothing: GRUB expands `*` in file names only with the `regexp` module).
+  - Video through the firmware only: `efi_gop` and `efi_uga` on UEFI, `vbe` in the BIOS
+    `core.img` (with `font gfxterm gfxterm_background gfxmenu png`), so the menu looks
+    the same from both. Not `all_video`: it also brings `video_bochs` and
+    `video_cirrus`, which program QEMU's video card directly; under OVMF the screen
+    became 8x32 pixels and `gfxterm` failed ("glyphs too large to fit on screen").
+  - **Other systems (the user's choice):** at every boot from UEFI GRUB looks on all the
+    partitions for the boot loader of known systems and adds an entry that chainloads
+    it: Windows (`/EFI/Microsoft/Boot/bootmgfw.efi`), Ubuntu, Debian, Fedora, openSUSE
+    (their shim), systemd-boot, and GRUB installed as `EFI/GRUB`. A system installed
+    later shows up with nothing to update.
+    - The search is `for loader in (*)/path` with the `regexp` module built in: `(*)`
+      expands only to the partitions that have the file, then `[ -f ]` checks it.
+      `search --file` prints an error on the screen for every loader it does not find.
+      `regexp` changes nothing else in `grub.cfg`: only words with `*` or `?` expand.
+    - The entry sets `root` to the loader's partition before `chainloader`: GRUB's EFI
+      chainloader tells the started loader that it comes from the root device, and
+      Windows looks for its boot configuration there. Without it the loaders found
+      started as if from our own EFI partition.
+    - Only FAT is built into GRUB, so it reads only EFI partitions, never the file
+      systems of the other systems.
+  - No decompressor messages on the screen from BIOS: `CONFIG_X86_VERBOSE_BOOTUP` off
+    (`input-platform.cfg`). GRUB starts the kernel from BIOS through its 32-bit entry,
+    which skips the setup code that reads `quiet`.
+  - `tools/run-qemu.sh --with-disk=FILE` attaches a second disk, to see another system
+    in the menu.
+- **Discarded:** `os-prober` (planned in D-009): no recipe in our layers, it would be a
+  package in the system run as root that mounts the file systems of other systems, and
+  its entries go stale until it runs again; `os-prober` only in the installer (Phase 8),
+  for the same staleness; the whole Inter font (each `.pf2` ten times bigger, slower to
+  load); `.pf2` files made on the host and kept in the repository (D-023: generated
+  files are not kept, and the build would depend on the host's GRUB version).
+- **Still open:** from BIOS no entries for other systems (Windows on BIOS needs the
+  `ntfs` and `chain` modules and its own disk mapping): they start from the firmware's
+  boot menu; with Secure Boot (Phase 8) the chainloaded loaders must pass shim's checks
+  (Microsoft's and the distributions' are signed); localized menu texts (D-023).
+- **Checks done (QEMU, 2026-11-14, window visible):**
+  - Build: four `.pf2` fonts with the names of `theme.txt` (53 KB in all); BIOS
+    `core.img` 353 sectors of 2048; kernel fragments in the final configuration.
+  - UEFI with a second disk (`--with-disk`) holding two FAT partitions with fake loaders
+    (copies of systemd-boot at the Windows and systemd-boot paths): themed menu with
+    "Windows" and "Linux (systemd-boot)"; each entry started the loader of its own
+    partition (systemd-boot found `bootmgfw.efi` only when started from the "Windows"
+    one); no GRUB errors; normal boot to `running`, theme and fonts on the EFI
+    partition.
+  - BIOS: same themed menu, without the UEFI entry; black screen while the kernel
+    starts and a clean password prompt (no decompressor messages); `running`.
+  - Full test (new disk from SeaBIOS): keys set up, update to B, B confirmed with
+    `B_LEFT=3`, B interrupted 3 times at the password prompt (screenshots) → A at the
+    fourth boot (`B_TRY=1`, `B_LEFT=0`), EFI partition clean; then a new disk of the same
+    image from UEFI: slot A, `running`.
+  - Not tested: a real Windows (hardware session, step 6.3).
+
 ---
 
 ## 3. Visual style
@@ -1450,7 +1516,7 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today `build/bios-boot`). New steps and updates to
+a time**, the one open for review (today `build/grub-theme`). New steps and updates to
 `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several

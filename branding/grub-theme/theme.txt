@@ -1,9 +1,11 @@
 # project-os — GRUB theme (D-009, D-023)
 #
-# Centered boot menu with logo. The .pf2 fonts are not in the repository: the Yocto
-# recipe generates them with grub-mkfont from the Inter font (OFL-1.1 license) and
-# installs them next to this file:
-#   Inter Regular 14, Inter Regular 18, Inter Medium 18, Inter SemiBold 28
+# Centered boot menu with logo. The .pf2 fonts are not in the repository: the
+# project-os-grub-theme recipe makes them with grub-mkfont from the Inter font
+# (OFL-1.1 license) and installs them next to this file (step 5b, D-060):
+#   Inter Regular 14, Inter Regular 18, Inter Medium Regular 18,
+#   Inter SemiBold Regular 28
+# ("Regular" in the last two is grub-mkfont's naming, see the recipe)
 # The PNG images are regenerated with branding/tools/render.py.
 
 title-text: ""
@@ -28,12 +30,12 @@ terminal-box: "terminal_box_*.png"
   width = 100%
   height = 36
   align = "center"
-  font = "Inter SemiBold 28"
+  font = "Inter SemiBold Regular 28"
   color = "#F2F4F8"
   text = "project-os"
 }
 
-# Boot entries (project-os, Windows and other systems detected by os-prober)
+# Boot entries (project-os, and Windows and other systems found by GRUB, D-060)
 + boot_menu {
   left = 50%-260
   top = 20%+180
@@ -41,7 +43,7 @@ terminal-box: "terminal_box_*.png"
   height = 36%
   item_font = "Inter Regular 18"
   item_color = "#9AA3B2"
-  selected_item_font = "Inter Medium 18"
+  selected_item_font = "Inter Medium Regular 18"
   selected_item_color = "#FFFFFF"
   selected_item_pixmap_style = "select_*.png"
   item_height = 44

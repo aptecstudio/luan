@@ -24,8 +24,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** 5b (GRUB theme recipe and `os-prober`); then the real hardware test
-session (step 6) with all the hardware checks together.
+**Next step:** the real hardware test session (step 6) with all the hardware checks
+together.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 
@@ -118,10 +118,12 @@ with boot menu, A/B partitions and full hardware support.
   - [x] 4e. BIOS boot with GRUB in the same image (R-26): `boot.img` and `core.img`
         written after wic, same menu and slots as UEFI, `tools/run-qemu.sh --bios`
         (D-059); real BIOS and CSM firmwares in step 6.2
-- [ ] 5. GRUB boot menu (D-009):
+- [x] 5. GRUB boot menu (D-009):
   - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
-  - [ ] 5b. Yocto recipe: `.pf2` fonts, theme installation, `os-prober` to detect
-        Windows and other systems
+  - [x] 5b. Theme in the image: `project-os-grub-theme` recipe with the Inter `.pf2`
+        fonts, graphical menu from UEFI and BIOS; Windows and other systems found by
+        GRUB at every boot, without `os-prober` (the user's choice); no decompressor
+        messages on BIOS (D-060)
 - [ ] 6. **Real hardware test session** (D-040): all the checks that QEMU cannot do,
       done together in one step on real PCs, after steps 3b–5b. Every step that leaves
       something to check on real hardware adds it to this list instead of keeping it
@@ -131,7 +133,7 @@ with boot menu, A/B partitions and full hardware support.
       |---|---|---|---|
       | 6.1 | UEFI boot from the PC's own firmware, GRUB menu and automatic slot choice | any UEFI PC | D-026 |
       | 6.2 | BIOS boot with the same image | PC with legacy BIOS (or CSM) | step 4e, R-26 |
-      | 6.3 | Dual boot: Windows detected by `os-prober` and bootable from the menu | PC with Windows | step 5b, D-009 |
+      | 6.3 | Dual boot: Windows found by GRUB and bootable from the menu, theme on the PC's own screen | PC with Windows | step 5b, D-060 |
       | 6.4 | Encrypted data partition: creation, unlocking with password and recovery key, without TPM | PC without TPM | steps 4a, 4d, R-27 |
       | 6.5 | TPM as an extra unlock method | PC with TPM 2.0 | Phase 8, D-058 |
       | 6.6 | A/B update and automatic rollback, EFI partition check after a power cut | any PC | D-026, D-038 |
@@ -182,8 +184,6 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
-- [ ] On BIOS the kernel's decompressor prints its messages before the password prompt
-      despite `quiet` (D-059); look at it with the boot look of step 5b
 - [ ] Remove from the slot the unused `/boot/EFI/BOOT` files of the `grub-efi` package
       (D-048)
 - [ ] Update GRUB and `grub.cfg` on the EFI partition with RAUC, and GRUB's BIOS code
