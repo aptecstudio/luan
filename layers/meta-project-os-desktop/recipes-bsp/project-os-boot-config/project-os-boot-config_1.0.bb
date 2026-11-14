@@ -12,8 +12,9 @@ inherit deploy nopackages
 INHIBIT_DEFAULT_DEPS = "1"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-# Variables read by project-os-grub.cfg and written by RAUC (bootloader=grub)
-GRUBENV_VARS = "ORDER=A B;A_OK=1;A_TRY=0;B_OK=0;B_TRY=0"
+# Variables read by project-os-grub.cfg and written by RAUC (bootloader=grub); X_LEFT:
+# boot attempts left, written by GRUB and project-os-boot-attempts (D-058)
+GRUBENV_VARS = "ORDER=A B;A_OK=1;A_TRY=0;A_LEFT=3;B_OK=0;B_TRY=0;B_LEFT=3"
 
 do_compile() {
     # GRUB format: header, one variable per line, padding with '#' up to exactly

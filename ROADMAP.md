@@ -24,9 +24,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4d (data unlocking with password and recovery key) on the
-`build/verified-boot` branch; then 4e, 5b, and the real hardware test session (step 6)
-with all the hardware checks together. One step at a time, with the user's
+**Next step:** review of step 4d (D-058) on the `build/data-unlock` branch; then 4e,
+5b, and the real hardware test session (step 6) with all the hardware checks together. One step at a time, with the user's
 confirmation. Awaiting approval: the `proposed` details of the new application model
 (D-049, D-050, D-052, D-053, D-055).
 
@@ -112,9 +111,10 @@ with boot menu, A/B partitions and full hardware support.
           (D-047)
     - [x] 4c.4 UKI per slot on the EFI partition (two profiles, @0 slot A and @1 slot
           B), plus separate kernel + initramfs for BIOS boot; lz4hc slots (D-048)
-  - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
-        extra method where present; limit the memory of the key derivation for old
-        PCs with little RAM (D-044)
+  - [x] 4d. Data unlocking: password and recovery key (without TPM, R-27), set with
+        `project-os-data-key`; memory of the key derivation limited for old PCs; 3
+        boot attempts per slot, so a PC switched off at the password prompt does not
+        fall back (D-058). TPM as an extra method in Phase 8
   - [ ] 4e. BIOS boot with GRUB in the same image (R-26)
 - [ ] 5. GRUB boot menu (D-009):
   - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
@@ -131,7 +131,7 @@ with boot menu, A/B partitions and full hardware support.
       | 6.2 | BIOS boot with the same image | PC with legacy BIOS (or CSM) | step 4e, R-26 |
       | 6.3 | Dual boot: Windows detected by `os-prober` and bootable from the menu | PC with Windows | step 5b, D-009 |
       | 6.4 | Encrypted data partition: creation, unlocking with password and recovery key, without TPM | PC without TPM | steps 4a, 4d, R-27 |
-      | 6.5 | TPM as an extra unlock method | PC with TPM 2.0 | step 4d |
+      | 6.5 | TPM as an extra unlock method | PC with TPM 2.0 | Phase 8, D-058 |
       | 6.6 | A/B update and automatic rollback, EFI partition check after a power cut | any PC | D-026, D-038 |
       | 6.7 | Graphics: Intel (i915/xe), AMD (amdgpu/radeon), NVIDIA (nouveau), screen from the first moment, laptop brightness | PCs with each GPU | D-025 |
       | 6.8 | Intel audio with SOF: speakers, headphones, microphones | Intel laptop, 11th generation or later | step 3a, D-039 |
@@ -328,7 +328,13 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
         (next to Windows too), encryption, user, installation with GRUB
   - [ ] mobile (first boot after the recovery): language, Wi‑Fi/SIM, time zone, user
         and unlock code, permissions, preferences
+- [ ] Data partition created by the setup with the password and the recovery key, so
+      it is never unprotected; then `crypttab` stops trying the empty key (about 2 s
+      at every boot, D-058); the keyboard layout chosen in the setup reaches the
+      initramfs for the password prompt
 - [ ] Secure Boot with project-os keys enrolled by the user (D-009)
+- [ ] TPM 2.0 as an extra unlock method of the data partition, with a policy that
+      survives A/B updates; password and recovery key always kept (D-058)
 - [ ] Signing of packages and images; keys outside the repository
 - [ ] Signed A/B updates with automatic rollback to the previous version (D-018), on
       desktop and mobile
