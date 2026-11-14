@@ -24,8 +24,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** the real hardware test session (step 6) with all the hardware checks
-together.
+**Next step:** step 3c, hardware services (D-061), on the `build/hw-services` branch;
+then the real hardware test session (step 6) on the user's Intel i3 laptop.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 
@@ -90,12 +90,17 @@ with boot menu, A/B partitions and full hardware support.
       text terminal (D-015, D-016)
   - [x] 2a. Image recipe, machine and partition layout written
   - [x] 2b. First build and boot in QEMU on the build host (laptop, D-034)
-- [x] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
-      GPU) and firmware from linux-firmware, each with its reason (R-04, D-025)
+- [ ] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
+      GPU) and firmware from linux-firmware, each with its reason (R-04, D-025); the
+      services that make it usable
   - [x] 3a. Intel SOF audio firmware recipe (`sof-bin` 2026.09.2, D-039); listening
         test in step 6
   - [x] 3b. Intel microcode recipe, early microcode loading (with step 4c.1, D-043);
         real check in step 6.17
+  - [ ] 3c. Hardware services (the user's request: before the hardware session):
+        NetworkManager with wpa_supplicant and ModemManager (wired, Wi‑Fi, mobile
+        broadband, phone tethering), BlueZ, PipeWire with WirePlumber; command-line
+        test tools in development images; sound card in `tools/run-qemu.sh` (D-061)
 - [x] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
@@ -141,9 +146,10 @@ with boot menu, A/B partitions and full hardware support.
       | 6.8 | Intel audio with SOF: speakers, headphones, microphones | Intel laptop, 11th generation or later | step 3a, D-039 |
       | 6.9 | AMD audio: does the laptop need SOF firmware (not available today)? | recent AMD laptop | D-039 |
       | 6.10 | HD Audio and HDMI/DisplayPort audio on desktops | desktop PC | D-025 |
-      | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database | PCs/adapters available | D-025 |
-      | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones | PCs/adapters available | D-025 |
-      | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025 |
+      | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database: connection with `nmcli` | PCs/adapters available | D-025, D-061 |
+      | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones (`bluetoothctl`), audio to the headphones | PCs/adapters available | D-025, D-061 |
+      | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025, D-061 |
+      | 6.21 | Mobile data: internet shared by a phone over USB; a USB or built-in modem, if available | phone, modem | D-061 |
       | 6.14 | Input: keyboard, I2C touchpad and touchscreen (DesignWare I2C, GPIO interrupts), laptop buttons, USB devices, USB 4/Thunderbolt | Intel and AMD laptops | D-025, D-041 |
       | 6.15 | Laptop platform: battery, AC adapter, buttons, fans, temperatures, CPU frequency | laptop | D-025 |
       | 6.16 | Disks: NVMe, SATA, USB sticks, SD card reader, NTFS and exFAT partitions | PCs available | D-025 |
@@ -171,7 +177,6 @@ with boot menu, A/B partitions and full hardware support.
 - [x] Test in QEMU of an A/B update with a RAUC bundle and of the automatic rollback to
       the previous version (2026-11-12)
 - [ ] Dual boot test in QEMU with Windows installed
-- [ ] Basic services: network, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [x] Every component with its reason recorded (AGENTS.md §5.5): inventory of the
       current image and removal of the superfluous packages (2026-11-12, D-038); to be
       kept up to date at every new package

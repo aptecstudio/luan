@@ -19,11 +19,15 @@ IMAGE_INSTALL = "packagegroup-core-boot ${MACHINE_EXTRA_RRECOMMENDS} ${CORE_IMAG
 
 # Signed A/B updates (D-018, D-026)
 IMAGE_INSTALL += "rauc"
+# Network, Bluetooth and audio services (D-061)
+IMAGE_INSTALL += "packagegroup-project-os-services"
 # Recommended packages we do not want (R-02):
 #   squashfs-tools     bundles are mounted with the kernel driver
-#   busybox-udhcpc     second DHCP client: systemd-networkd already does DHCP
+#   busybox-udhcpc     second DHCP client: NetworkManager already does DHCP
 #   kbd-keymaps-pine   keyboard layouts for Pine64 devices only
-BAD_RECOMMENDATIONS += "squashfs-tools busybox-udhcpc kbd-keymaps-pine"
+#   nftables           NetworkManager's firewall for sharing a connection (hotspot),
+#                      not used yet (D-061)
+BAD_RECOMMENDATIONS += "squashfs-tools busybox-udhcpc kbd-keymaps-pine nftables"
 
 # Read-only system (D-018); data lives on the encrypted partition mounted on /var
 IMAGE_FEATURES += "read-only-rootfs"

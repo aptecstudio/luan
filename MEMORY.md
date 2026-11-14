@@ -1438,6 +1438,64 @@ Set by the user (2026-11-11 to 2026-11-13).
     image from UEFI: slot A, `running`.
   - Not tested: a real Windows (hardware session, step 6.3).
 
+### D-061 — Hardware services: NetworkManager, ModemManager, BlueZ, PipeWire (step 3c) · `proposed` (2026-11-14)
+- **What (the user's request: the hardware side complete before the hardware
+  session, step 6):** the services that make network, Bluetooth and audio usable,
+  in `packagegroup-project-os-services` (`meta-project-os`, shared with mobile); their
+  build options in the distribution configuration, trimmed to what is used.
+  - **Network: NetworkManager** for wired, Wi‑Fi and mobile networks, with
+    **wpa_supplicant** for Wi‑Fi and **ModemManager** (MBIM and QMI) for mobile
+    broadband, plus the provider database for the APN. DNS goes to
+    `systemd-resolved`, already in the system. `systemd-networkd` is turned off in
+    systemd: two managers on the same interfaces would fight over them. No polkit:
+    only root (later the broker, D-005) changes the network. No `dnsmasq`, PPP,
+    `ifupdown`, Bluetooth tethering, and no `nftables` (NetworkManager's firewall for
+    sharing a connection): not used yet.
+  - **Bluetooth: BlueZ** with the profiles for keyboards, mice, audio and LE Audio;
+    without OBEX file transfer, PAN networking and the deprecated tools.
+  - **Audio: PipeWire with WirePlumber**, started by systemd for each user session (no
+    system-wide service), with ALSA devices, Bluetooth audio (SBC; AAC needs a
+    commercial license) and the ALSA plugin that routes ALSA programs to PipeWire;
+    `alsa-ucm-conf` for the laptops with an audio DSP (Intel SOF, AMD ACP). No
+    GStreamer, JACK, camera, Avahi, Flatpak, FFmpeg: they come with the phases that
+    use them.
+  - **Kernel:** `wwan.cfg` (desktop): USB modems (MBIM, QMI, NCM, serial AT ports), M.2
+    modems on PCIe (Qualcomm MHI, Intel XMM7360, MediaTek T7xx), internet shared by a
+    phone over USB (Android RNDIS and NCM, iPhone).
+  - **Layers:** `meta-networking` (NetworkManager) and `meta-multimedia` (PipeWire,
+    WirePlumber) of meta-openembedded, and `meta-python` because both depend on it.
+  - **Build trimming:** PipeWire's recipe sets its defaults with the `class-target`
+    override, which wins over a `pn-pipewire` assignment (the first build compiled
+    Vulkan, Wayland, X11 and GStreamer tools): the unused options are removed with
+    `:remove` instead, checked with `bitbake -e` and the dependency graph.
+    `gobject-introspection-data` is opted out of the distribution (bindings for other
+    languages, unused, made by running each library under emulation); the BlueZ
+    bbappend drops the run-time dependencies of the never-installed Python test
+    scripts, which made the build compile PyGObject.
+  - **Development images only** (`kas/dev.yml`): `packagegroup-project-os-dev-tools`
+    with `nmcli`, `iw`, `speaker-test`/`aplay`/`amixer`, `lspci`, `lsusb`, to test the
+    hardware by hand; `bluetoothctl` and `wpctl` come with their services.
+  - **`tools/run-qemu.sh --audio-file=FILE`:** an HD Audio sound card whose output is
+    recorded into a WAV file, to check the audio chain in the emulator.
+- **Why NetworkManager (the user left the choice, asking to consider wired and mobile
+  networks on every platform):** it covers wired, Wi‑Fi, mobile broadband, VPN and
+  hotspot with one D-Bus API, which the shell and the settings will use (Phases 5–6);
+  the Halium-based phone systems (Ubuntu Touch, Droidian) use it too, so desktop and
+  mobile (D-014) share it; ModemManager is its standard companion for modems.
+- **Discarded:** iwd with systemd-networkd (lighter, but no mobile broadband or VPN,
+  and iwd does not work with many Android vendor Wi‑Fi drivers); NetworkManager with
+  iwd (the same driver problem on phones; one Wi‑Fi backend everywhere); ConnMan with
+  oFono (smaller community, oFono is fading out in favor of ModemManager); a
+  system-wide PipeWire (one audio server for all users, against the isolation of
+  D-005).
+- **Still open:** hotspot and connection sharing (`dnsmasq`, `nftables`) and the
+  firewall; captive-portal detection (it contacts a server: to be decided); on mobile,
+  the modem through Halium (oFono or ModemManager, Phase 7); PipeWire for apps
+  (PulseAudio compatibility, GStreamer) with WebKit (Phase 2).
+- **Checks done:** dependency graph and effective build options (2026-11-14). Build
+  and QEMU test (`tools/run-qemu.sh --audio-file`: wired network with DNS, ModemManager
+  and BlueZ without hardware, a 440 Hz tone recorded in the WAV file) still to do.
+
 ---
 
 ## 3. Visual style
@@ -1516,7 +1574,7 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today `build/grub-theme`). New steps and updates to
+a time**, the one open for review (today `build/hw-services`). New steps and updates to
 `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several

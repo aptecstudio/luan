@@ -2,12 +2,15 @@
 # Boots the project-os desktop image in the QEMU emulator, with UEFI firmware (or BIOS).
 #
 # Usage: tools/run-qemu.sh [--reset] [--text] [--bios] [--with-disk=FILE]
+#                          [--audio-file=FILE]
 #   --reset            start again from a new disk, copied from the latest build (loses
 #                      data)
 #   --text             no graphical window: everything in the terminal (serial console)
 #   --bios             start the same disk from a legacy BIOS (SeaBIOS) instead of UEFI
 #   --with-disk=FILE   attach FILE (raw disk image) as a second disk, e.g. with another
 #                      system, to see it in the boot menu (D-060)
+#   --audio-file=FILE  add an HD Audio sound card whose output is recorded into FILE
+#                      (WAV), to check the audio services (D-061)
 #
 # The emulator disk is a copy of the image in build/qemu/disk.img, with 16 GB of extra
 # free space: on first boot systemd-repart creates the data partition there.
@@ -21,12 +24,14 @@ reset=0
 text_mode=0
 bios=0
 other_disk=""
+audio_file=""
 for arg in "$@"; do
     case "$arg" in
         --reset) reset=1 ;;
         --text) text_mode=1 ;;
         --bios) bios=1 ;;
         --with-disk=*) other_disk=${arg#--with-disk=} ;;
+        --audio-file=*) audio_file=${arg#--audio-file=} ;;
         *) echo "Unknown option: $arg" >&2; exit 2 ;;
     esac
 done
@@ -108,6 +113,14 @@ if [ -n "$other_disk" ]; then
         -device nvme,serial=projectos1,drive=other"
 fi
 
+# Sound card: Intel HD Audio with a codec that has output and input; what the system
+# plays is written into the WAV file
+AUDIO_ARGS=""
+if [ -n "$audio_file" ]; then
+    AUDIO_ARGS="-audiodev wav,id=audio0,path=$audio_file
+        -device intel-hda -device hda-duplex,audiodev=audio0"
+fi
+
 # shellcheck disable=SC2086
 exec qemu-system-x86_64 \
     -machine q35,accel="$ACCEL" -cpu "$CPU" -smp 2 -m 2048 \
@@ -115,6 +128,7 @@ exec qemu-system-x86_64 \
     -drive if=none,id=system,format=raw,file="$DISK" \
     -device nvme,serial=projectos0,drive=system \
     $OTHER_DISK_ARGS \
+    $AUDIO_ARGS \
     -nic user,model=e1000e \
     -device qemu-xhci -device usb-kbd -device usb-tablet \
     $DISPLAY_ARGS

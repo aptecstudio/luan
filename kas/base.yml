@@ -24,7 +24,10 @@ repos:
     layers:
       meta:
 
-  # meta-oe: cryptsetup (encryption and dm-verity), lvm2 (D-026)
+  # meta-oe: cryptsetup (encryption and dm-verity), lvm2 (D-026), ModemManager (D-061).
+  # meta-networking: NetworkManager; meta-multimedia: PipeWire and WirePlumber (D-061).
+  # meta-python only because the other two depend on it: nothing from it goes into the
+  # image.
   meta-openembedded:
     url: https://git.openembedded.org/meta-openembedded
     branch: wrynose
@@ -32,6 +35,9 @@ repos:
     path: sources/meta-openembedded
     layers:
       meta-oe:
+      meta-python:
+      meta-networking:
+      meta-multimedia:
 
   # RAUC: signed A/B updates (D-018, D-026)
   meta-rauc:

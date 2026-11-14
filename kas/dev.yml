@@ -14,6 +14,8 @@ local_conf_header:
     # Passwordless root login, also on the serial console
     EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login \
         serial-autologin-root"
+    # Tools for testing network, Bluetooth, audio and devices (D-061)
+    CORE_IMAGE_EXTRA_INSTALL += "packagegroup-project-os-dev-tools"
     # Testing in QEMU: tools/run-qemu.sh uses QEMU and the OVMF firmware of the build
     # host (installed by tools/setup-host.sh). They are not built here: the qemuboot
     # class and the ovmf recipe would pull in QEMU with graphics, hence Mesa, LLVM and

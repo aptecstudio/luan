@@ -5,7 +5,7 @@ COMPATIBLE_MACHINE:project-os-amd64 = "project-os-amd64"
 KMACHINE:project-os-amd64 = "common-pc-64"
 KBRANCH:project-os-amd64 = "v6.18/standard/base"
 
-# Modern hardware (R-04, D-025) and virtual machines (D-041). Each fragment is checked
+# Modern hardware (R-04, D-025), virtual machines (D-041) and mobile broadband (D-061). Each fragment is checked
 # against the kernel Kconfig files with tools/check-kernel-fragments.py, and against the
 # final configuration by do_project_os_configcheck below.
 FILESEXTRAPATHS:prepend:project-os-amd64 := "${THISDIR}/files:"
@@ -19,6 +19,7 @@ SRC_URI:append:project-os-amd64 = " \
     file://input-platform.cfg \
     file://ab-crypt.cfg \
     file://virt-guest.cfg \
+    file://wwan.cfg \
 "
 
 # Every option set by our fragments must end up in the final .config with the value we
