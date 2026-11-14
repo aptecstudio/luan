@@ -1371,7 +1371,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   password prompt (screenshots) → A at the fourth boot, `B_TRY=1`, EFI partition clean.
   Then a new disk of the same image from UEFI: slot A, system `running`. The disk made
   by the script is identical, byte for byte, to the one first tested by hand.
-### D-060 — Boot menu theme in the image, other systems found by GRUB (step 5b) · `proposed` (2026-11-14)
+### D-060 — Boot menu theme in the image, other systems found by GRUB (step 5b) · `confirmed` (the user's approval, 2026-11-14)
 - **What:**
   - `project-os-grub-theme` recipe: the theme of `branding/grub-theme` (D-023, single
     source, read from outside the layer) with the Inter 4.1 fonts of the official
