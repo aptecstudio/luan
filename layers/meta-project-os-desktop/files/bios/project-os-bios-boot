@@ -1,0 +1,81 @@
+#!/bin/sh
+# project-os — write GRUB's BIOS boot code into a disk image (step 4e, R-26, D-059).
+#
+# Usage: project-os-bios-boot DISK GRUB_I386_PC_DIR PREFIX MODULE...
+#   DISK              GPT disk image whose partition 1 is bios_grub
+#   GRUB_I386_PC_DIR  GRUB's i386-pc directory (modules, boot.img)
+#   PREFIX            where GRUB finds grub.cfg, e.g. (,gpt2)/EFI/BOOT
+#   MODULE...         modules built into core.img
+#
+# Called by project_os_bios_boot.bbclass after wic, with grub-mkimage and sgdisk of the
+# build. It does what grub-bios-setup does for a disk with a bios_grub partition (GRUB
+# 2.14, util/setup.c): grub-bios-setup needs to find the real disk of the directory it
+# works in, and fails on an image file in a build directory.
+#   - sector 0 (protective MBR of the GPT): boot.img, which loads core.img;
+#   - partition 1, bios_grub: core.img.
+# The UEFI path is untouched: the firmware never reads sector 0 or bios_grub.
+set -eu
+
+BIOS_GRUB_TYPE=21686148-6449-6E6F-744E-656564454649
+
+die() {
+    echo "project-os-bios-boot: $*" >&2
+    exit 1
+}
+
+# Writes value $3 as a little-endian integer of $4 bytes at byte $2 of file $1
+write_le() {
+    bytes=""
+    i=0
+    while [ "$i" -lt "$4" ]; do
+        bytes="$bytes\\$(printf '%03o' $((($3 >> (8 * i)) & 255)))"
+        i=$((i + 1))
+    done
+    # shellcheck disable=SC2059 # the octal escapes are the data
+    printf "$bytes" | dd of="$1" bs=1 seek="$2" conv=notrunc status=none
+}
+
+[ "$#" -ge 4 ] || die "usage: project-os-bios-boot DISK GRUB_I386_PC_DIR PREFIX MODULE..."
+disk=$1
+grub_dir=$2
+prefix=$3
+shift 3
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+grub-mkimage -O i386-pc -d "$grub_dir" -p "$prefix" -o "$work/core.img" "$@"
+
+# Partition 1 must be the bios_grub partition, large enough for core.img
+info=$(sgdisk -i 1 "$disk")
+echo "$info" | grep -qi "^Partition GUID code: $BIOS_GRUB_TYPE" ||
+    die "partition 1 of $disk is not bios_grub"
+first=$(echo "$info" | awk '/^First sector:/ { print $3 }')
+last=$(echo "$info" | awk '/^Last sector:/ { print $3 }')
+core_size=$(wc -c <"$work/core.img")
+core_sectors=$(((core_size + 511) / 512))
+if [ "$core_sectors" -gt $((last - first + 1)) ]; then
+    die "core.img ($core_sectors sectors) does not fit in bios_grub"
+fi
+
+# core.img into bios_grub. Its first sector (diskboot) loads the others: the blocklist
+# at the end of that sector says where (start sector, count; the load segment 0x820 is
+# already there); the zero entry before it ends the list.
+dd if="$work/core.img" of="$disk" bs=512 seek="$first" conv=notrunc status=none
+list=$((first * 512 + 512 - 12))
+write_le "$disk" "$list" $((first + 1)) 8
+write_le "$disk" $((list + 8)) $((core_sectors - 1)) 2
+dd if=/dev/zero of="$disk" bs=1 seek=$((list - 12)) count=12 conv=notrunc status=none
+
+# boot.img into sector 0, keeping what wic wrote there: the BPB area (0x03-0x59) and,
+# from 0x1b8, the disk signature, the protective partition entry and 0x55aa
+dd if="$grub_dir/boot.img" of="$disk" bs=1 count=3 conv=notrunc status=none
+dd if="$grub_dir/boot.img" of="$disk" bs=1 skip=90 seek=90 count=$((0x1b8 - 90)) \
+    conv=notrunc status=none
+# Sector of core.img; boot drive 0xff (the one the BIOS passes); the jump of the drive
+# check replaced by two NOPs, for BIOSes that pass a wrong drive number
+write_le "$disk" $((0x5c)) "$first" 8
+printf '\377' | dd of="$disk" bs=1 seek=$((0x64)) conv=notrunc status=none
+printf '\220\220' | dd of="$disk" bs=1 seek=$((0x66)) conv=notrunc status=none
+
+echo "BIOS boot: core.img ($core_sectors sectors) at sector $first of $disk"

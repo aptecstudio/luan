@@ -855,6 +855,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   know). Rust (`cargo fmt`, `clippy`), Luau (StyLua, selene,
   `luau-analyze`), XML layouts (schema validation) and JavaScript (ESLint, Prettier)
   are run as soon as the repository has code in that language (AGENTS.md §7).
+  `tools/lint.sh` checks the files tracked by git: new files are added (`git add`)
+  before running it, otherwise they are skipped (a ShellCheck finding in a new script
+  of step 4d was found only in step 4e this way).
 - **oelint-adv rules left out**, each with its reason in `tools/lint.sh`:
   `suggestedvar.SECTION/BUGTRACKER/CVE_PRODUCT` and `bbclassextend` (meant for
   recipes of software published elsewhere), `licenseremotefile` (our recipes have no
@@ -1324,6 +1327,51 @@ Set by the user (2026-11-11 to 2026-11-13).
     boot, `A_LEFT` back to 3 after the login); update to B, B confirmed with
     `B_LEFT=3`; B interrupted at the prompt 3 times → A at the fourth boot (`B_TRY=1`,
     `B_LEFT=0`), system `running`, EFI partition clean.
+
+### D-059 — BIOS boot with GRUB in the same disk image (step 4e) · `proposed` (2026-11-14)
+- **What:** the disk that boots from UEFI also boots from a legacy BIOS (R-26), with the
+  same `grub.cfg`, `grubenv`, slots and boot files on the EFI partition.
+  `project_os_bios_boot.bbclass` runs `files/bios/project-os-bios-boot` at the end of
+  `IMAGE_CMD:wic`, before the `.wic.bmap` map is made:
+  - `core.img` built with `grub-mkimage -O i386-pc` (modules of `grub-native`) with only
+    the modules the menu needs on BIOS: `biosdisk part_gpt fat normal configfile echo
+    test loadenv linux minicmd search` (148 KB, 290 sectors), prefix
+    `(,gpt2)/EFI/BOOT` (the EFI partition of the disk the BIOS booted from), written into
+    the 1 MiB `bios_grub` partition;
+  - `boot.img` into the protective MBR, keeping the BPB area and, from 0x1b8, the disk
+    signature, the protective partition entry and `0x55aa`; then the sector of
+    `core.img` (0x5c), boot drive 0xff (0x64), NOPs over the drive check (0x66), and
+    the blocklist of `core.img` (sector after the first, count), as GRUB 2.14's
+    `util/setup.c` does for a `bios_grub` partition.
+  - On BIOS `grub.cfg` loads `bzImage`, `microcode.cpio` and `initramfs.cpio.zst` of the
+    slot with the command line of its `boot.env` (prepared in step 4c.4, D-048); the
+    update bundle already writes them for the slot it installs.
+- **`tools/run-qemu.sh --bios`:** the same disk with QEMU's SeaBIOS instead of OVMF. On
+  BIOS, GRUB and the kernel write only on the screen: automated tests check every boot
+  with a screenshot.
+- **Discarded:** `grub-bios-setup` and `grub-install` (they look for the real disk of
+  their working directory and fail on an image file in the build: "failed to get
+  canonical path", "disk does not exist"); a wic source plugin (more code bound to wic
+  internals for the same few writes); copying the i386-pc module directory to the EFI
+  partition (about 600 files; built-in modules are enough until the theme of step 5b,
+  which adds `gfxterm`, `font`, `png` and the video modules); the work in the class
+  itself (BitBake's shell parser does not accept arithmetic expansion: the build stopped
+  at parsing). Reed-Solomon codes left out (`--no-rs-codes` behaviour): they only help
+  recover a `core.img` damaged on disk.
+- **Still open:** on BIOS the kernel's decompressor prints its messages ("early console
+  in extract_kernel"…) before the password prompt, despite `quiet`; to be looked at with
+  the boot look of step 5b. Updates do not rewrite `boot.img` and `core.img` yet (with
+  GRUB and `grub.cfg` on the EFI partition, ROADMAP). Real BIOS and CSM firmwares in the
+  hardware session (step 6.2): some old BIOSes boot a GPT disk only if the protective
+  MBR entry is marked active.
+- **Checks done (QEMU, 2026-11-14, window visible):** new disk from SeaBIOS: no EFI
+  firmware (`/sys/firmware/efi` missing), GRUB menu without the UEFI entry, slot A from
+  `/EFI/project-os/A/bzImage`, dm-verity root, encrypted data and `/etc` overlay,
+  system `running`, `grubenv` written by GRUB on BIOS (`A_LEFT` back to 3); keys set up,
+  update to B, slot B from its own `bzImage` and confirmed; B interrupted 3 times at the
+  password prompt (screenshots) → A at the fourth boot, `B_TRY=1`, EFI partition clean.
+  Then a new disk of the same image from UEFI: slot A, system `running`. The disk made
+  by the script is identical, byte for byte, to the one first tested by hand.
 ---
 
 ## 3. Visual style
@@ -1402,8 +1450,8 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today none: the next one is opened for step 4e). New steps and updates
-to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
+a time**, the one open for review (today `build/bios-boot`). New steps and updates to
+`MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several
 devices.

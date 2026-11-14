@@ -1,8 +1,9 @@
 # short-description: project-os desktop — A/B partitions (D-026)
 # .wks.in file: bitbake substitutes the variables (${EFI_PROVIDER}, ${IMGDEPLOYDIR}…)
 # before passing it to wic.
-# long-description: GPT bootable from UEFI and (from step 4e) from BIOS.
-#   1 bios_grub   1 MiB   room for GRUB when the PC boots from BIOS (R-26)
+# long-description: GPT bootable from UEFI and from BIOS (R-26).
+#   1 bios_grub   1 MiB   GRUB's core.img for BIOS boot, written after wic together with
+#                         boot.img in the protective MBR (project_os_bios_boot, D-059)
 #   2 esp         512 MiB EFI partition: GRUB, menu, theme, slot state, and the boot
 #                         files of each slot in EFI/project-os/<A|B> (UKI, kernel,
 #                         initramfs; D-048)
