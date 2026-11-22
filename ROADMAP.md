@@ -24,9 +24,7 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** confirmation of D-061 (step 3c, tested in QEMU) and merge into `main`
-together with the rename (D-062), branch `build/rename-luan`; then the real hardware
-test session (step 6) on the user's Intel i3 laptop.
+**Next step:** the real hardware test session (step 6) on the user's Intel i3 laptop.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 

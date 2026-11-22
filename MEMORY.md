@@ -1440,7 +1440,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     image from UEFI: slot A, `running`.
   - Not tested: a real Windows (hardware session, step 6.3).
 
-### D-061 — Hardware services: NetworkManager, ModemManager, BlueZ, PipeWire (step 3c) · `proposed` (2026-11-14)
+### D-061 — Hardware services: NetworkManager, ModemManager, BlueZ, PipeWire (step 3c) · `confirmed` (the user's approval, 2026-11-22)
 - **What (the user's request: the hardware side complete before the hardware
   session, step 6):** the services that make network, Bluetooth and audio usable,
   in `packagegroup-luan-services` (`meta-luan`, shared with mobile); their
