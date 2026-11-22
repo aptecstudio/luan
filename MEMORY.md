@@ -1509,13 +1509,13 @@ Set by the user (2026-11-11 to 2026-11-13).
     BitBake functions and classes `luan_*` (AGENTS.md §7), host name `luan`,
     repository `aptecstudio/luan`; messages printed by scripts start with `luan:`, and
     the development certificates use `O=Luan` (ASCII, no `-utf8` needed);
-  - **logo:** a crescent moon with three four-pointed stars in its hollow,
+  - **logo:** a crescent moon with two four-pointed stars in its hollow, a large one
+    and a small one above it (the user removed the lower third star of the draft),
     **white** on night blue (the user asked for white instead of the first yellow
     draft), night blue `#1B2559` on light backgrounds. The final file is
     `branding/logo/luan-logo.svg`: the crescent is one path (outer circle minus the
     bite circle) instead of an SVG mask, so `rsvg-convert` and any other renderer draw
-    it the same way; the middle star sits a little inside the hollow, so it does not
-    touch the tip of the crescent;
+    it the same way;
   - **concept:** the design canvas the logo was chosen on is kept in
     `branding/concept/` (`canvas.json` and one `.dc.html` file per artboard: main
     logo with the wordmark, and dark, light, monochrome and app icon variants). Its

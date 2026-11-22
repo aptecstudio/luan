@@ -63,7 +63,7 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
 ## Phase 0 — Foundations and decisions · `in progress`
 
 - [x] Repository `luan` with main branch `main`, GPL-3.0 license (D-020)
-- [x] Final name **Luán** and logo, a crescent moon with three stars; every name in the
+- [x] Final name **Luán** and logo, a crescent moon with two stars; every name in the
       repository updated (D-062)
 - [ ] Rename the GitHub repository from `aptecstudio/project-os` to `aptecstudio/luan`
       (the links in the repository already point to the new name, D-062)
