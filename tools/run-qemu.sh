@@ -1,5 +1,5 @@
 #!/bin/sh
-# Boots the project-os desktop image in the QEMU emulator, with UEFI firmware (or BIOS).
+# Boots the Luán desktop image in the QEMU emulator, with UEFI firmware (or BIOS).
 #
 # Usage: tools/run-qemu.sh [--reset] [--text] [--bios] [--with-disk=FILE]
 #                          [--audio-file=FILE]
@@ -36,8 +36,8 @@ for arg in "$@"; do
     esac
 done
 
-DEPLOY=build/tmp/deploy/images/project-os-amd64
-IMAGE="$DEPLOY/project-os-image-base-project-os-amd64.rootfs.wic"
+DEPLOY=build/tmp/deploy/images/luan-amd64
+IMAGE="$DEPLOY/luan-image-base-luan-amd64.rootfs.wic"
 WORK=build/qemu
 DISK="$WORK/disk.img"
 VARS="$WORK/OVMF_VARS.fd"
@@ -105,12 +105,12 @@ else
         -drive if=pflash,format=raw,file=$VARS"
 fi
 
-# Second disk: after the system disk, so the firmware still boots project-os
+# Second disk: after the system disk, so the firmware still boots Luán
 OTHER_DISK_ARGS=""
 if [ -n "$other_disk" ]; then
     [ -f "$other_disk" ] || { echo "Disk not found: $other_disk" >&2; exit 1; }
     OTHER_DISK_ARGS="-drive if=none,id=other,format=raw,file=$other_disk
-        -device nvme,serial=projectos1,drive=other"
+        -device nvme,serial=luan1,drive=other"
 fi
 
 # Sound card: Intel HD Audio with a codec that has output and input; what the system
@@ -126,7 +126,7 @@ exec qemu-system-x86_64 \
     -machine q35,accel="$ACCEL" -cpu "$CPU" -smp 2 -m 2048 \
     $FIRMWARE_ARGS \
     -drive if=none,id=system,format=raw,file="$DISK" \
-    -device nvme,serial=projectos0,drive=system \
+    -device nvme,serial=luan0,drive=system \
     $OTHER_DISK_ARGS \
     $AUDIO_ARGS \
     -nic user,model=e1000e \

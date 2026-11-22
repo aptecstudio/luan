@@ -43,7 +43,6 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
 - [ ] **DA-05 — App package format** *(blocks Phase 3)*
   `.pak` (R-39) with a signature over the whole file, read in place: details proposed
   in D-052, to be approved.
-- [ ] **DA-06b — Final name of the system** *(not blocking; "project-os" for now)*
 - [ ] **DA-11 — Build host** *(blocks the Phase 1 checks)*
   Yocto must run on a machine of the user's (VM or physical): at least 16 GB of RAM,
   250 GB of disk, many cores. Ubuntu Server 24.04/26.04 LTS recommended. Guide and
@@ -55,15 +54,19 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
   To decide: (a) local network and Bluetooth only, or also a relay service for distant
   devices, and in that case hosted by whom (the user themselves, the project);
   (b) network discovery with mDNS (re-enabling `zeroconf`) or with an own announcement;
-  (c) compatibility with devices that do not run project-os (e.g. the KDE Connect
-  protocol for Android and Linux) or an ecosystem reserved to project-os only;
+  (c) compatibility with devices that do not run Luán (e.g. the KDE Connect
+  protocol for Android and Linux) or an ecosystem reserved to Luán only;
   (d) order of the features listed in D-033.
 
 ---
 
 ## Phase 0 — Foundations and decisions · `in progress`
 
-- [x] Repository `project-os` with main branch `main`, GPL-3.0 license (D-020)
+- [x] Repository `luan` with main branch `main`, GPL-3.0 license (D-020)
+- [x] Final name **Luán** and logo, a crescent moon with three stars; every name in the
+      repository updated (D-062)
+- [ ] Rename the GitHub repository from `aptecstudio/project-os` to `aptecstudio/luan`
+      (the links in the repository already point to the new name, D-062)
 - [x] Governance documents: `AGENTS.md`, `MEMORY.md`, `ROADMAP.md`
 - [x] Architecture decided and approved: system built from source with Yocto, Rust,
       own compositor, mediated root, immutable A/B updates (D-005…D-022)
@@ -83,7 +86,7 @@ with boot menu, A/B partitions and full hardware support.
 
 **Steps:**
 - [x] 1. Configure Yocto 6.0 "Wrynose" (LTS) with kas and create the
-      `meta-project-os` and `meta-project-os-desktop` layers (D-012, D-024); bitbake
+      `meta-luan` and `meta-luan-desktop` layers (D-012, D-024); bitbake
       reads the configuration without errors. Confirmed by the first full build
       (2026-11-11).
 - [x] 2. Minimal image: Linux 6.18 LTS kernel, glibc, systemd; boot in QEMU/UEFI up to a
@@ -117,15 +120,15 @@ with boot menu, A/B partitions and full hardware support.
     - [x] 4c.4 UKI per slot on the EFI partition (two profiles, @0 slot A and @1 slot
           B), plus separate kernel + initramfs for BIOS boot; lz4hc slots (D-048)
   - [x] 4d. Data unlocking: password and recovery key (without TPM, R-27), set with
-        `project-os-data-key`; memory of the key derivation limited for old PCs; 3
+        `luan-data-key`; memory of the key derivation limited for old PCs; 3
         boot attempts per slot, so a PC switched off at the password prompt does not
         fall back (D-058). TPM as an extra method in Phase 8
   - [x] 4e. BIOS boot with GRUB in the same image (R-26): `boot.img` and `core.img`
         written after wic, same menu and slots as UEFI, `tools/run-qemu.sh --bios`
         (D-059); real BIOS and CSM firmwares in step 6.2
 - [x] 5. GRUB boot menu (D-009):
-  - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
-  - [x] 5b. Theme in the image: `project-os-grub-theme` recipe with the Inter `.pf2`
+  - [x] 5a. Logo and theme in `branding/`, with preview (D-023; final logo D-062)
+  - [x] 5b. Theme in the image: `luan-grub-theme` recipe with the Inter `.pf2`
         fonts, graphical menu from UEFI and BIOS; Windows and other systems found by
         GRUB at every boot, without `os-prober` (the user's choice); no decompressor
         messages on BIOS (D-060)
@@ -317,7 +320,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
       technical risk on the mobile side (D-014). Fallback for web views: Igalia's WPE
       port for Android (D-051)
 - [ ] Same user space compiled for arm64, without changes
-- [ ] `meta-project-os-mobile` layer: Halium/libhybris
+- [ ] `meta-luan-mobile` layer: Halium/libhybris
 - [ ] Pixel: vendor kernel and firmware, GPU, touch, audio, Wi‑Fi, Bluetooth
 - [ ] Pixel: modem (calls, text messages, data), sensors, camera
 - [ ] Pixel release files (D-011, D-056): fastboot package with flashing script and
@@ -342,7 +345,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
       it is never unprotected; then `crypttab` stops trying the empty key (about 2 s
       at every boot, D-058); the keyboard layout chosen in the setup reaches the
       initramfs for the password prompt
-- [ ] Secure Boot with project-os keys enrolled by the user (D-009)
+- [ ] Secure Boot with Luán keys enrolled by the user (D-009)
 - [ ] TPM 2.0 as an extra unlock method of the data partition, with a policy that
       survives A/B updates; password and recovery key always kept (D-058)
 - [ ] Signing of packages and images; keys outside the repository
@@ -354,7 +357,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
 
 ## Phase 9 — Ecosystem: interoperability between devices · `proposed`
 
-Goal: the same user's project-os devices, desktop and mobile, work together as a single
+Goal: the same user's Luán devices, desktop and mobile, work together as a single
 ecosystem (R-33, D-033). Requires DA-12.
 
 - [ ] Protocol specification (`docs/continuity.md`): pairing, keys, end-to-end

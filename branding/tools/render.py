@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate the project-os branding images from their sources (D-023).
+"""Generate the Luán branding images from their sources (D-023).
 
 Usage:    python3 branding/tools/render.py
 Requires: rsvg-convert, Python 3 with Pillow and NumPy; the Inter font for the preview.
 
 Produces:
-  branding/logo/project-os-logo-{256,96}.png
-  branding/logo/project-os-logo-dark-256.png   (dark variant, for light backgrounds)
+  branding/logo/luan-logo-{256,96}.png
+  branding/logo/luan-logo-dark-256.png   (dark variant, for light backgrounds)
   branding/grub-theme/{logo,background}.png
   branding/grub-theme/select_{nw,n,ne,w,c,e,sw,s,se}.png
   branding/grub-theme/terminal_box_{nw,n,ne,w,c,e,sw,s,se}.png
@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 BRANDING_DIR = Path(__file__).resolve().parents[1]
-LOGO_SVG = BRANDING_DIR / "logo" / "project-os-logo.svg"
+LOGO_SVG = BRANDING_DIR / "logo" / "luan-logo.svg"
 THEME_DIR = BRANDING_DIR / "grub-theme"
 PREVIEWS_DIR = BRANDING_DIR / "previews"
 
@@ -32,6 +32,8 @@ GLOW_COLOR = (0x2A, 0x2F, 0x6B)
 TEXT_COLOR = (0xF2, 0xF4, 0xF8)
 ITEM_COLOR = (0x9A, 0xA3, 0xB2)
 MUTED_COLOR = (0x7D, 0x85, 0x97)
+# The logo on light backgrounds: night blue instead of white (D-062)
+LOGO_ON_LIGHT_COLOR = "#1B2559"
 FAINT_COLOR = (0x59, 0x61, 0x73)
 
 SCREEN_SIZE = (1920, 1080)
@@ -128,15 +130,15 @@ def preview(background_image: Image.Image) -> Image.Image:
 
     draw.text(
         (width / 2, logo_top + 116 + 18),
-        "project-os",
+        "Luán",
         font=font("SemiBold", 28),
         fill=TEXT_COLOR,
         anchor="mm",
     )
 
     entries = [
-        "project-os",
-        "project-os (previous version)",
+        "Luán",
+        "Luán (previous version)",
         "Windows Boot Manager",
         "UEFI Firmware Settings",
     ]
@@ -198,14 +200,13 @@ def main() -> None:
     """Render every branding image."""
     PREVIEWS_DIR.mkdir(exist_ok=True)
     for size_px in (256, 96):
-        output = BRANDING_DIR / "logo" / f"project-os-logo-{size_px}.png"
+        output = BRANDING_DIR / "logo" / f"luan-logo-{size_px}.png"
         render_svg(LOGO_SVG, output, size_px)
 
-    # Dark variant of the same placeholder, for light backgrounds (e.g. README on
-    # GitHub)
+    # Dark variant of the same logo, for light backgrounds (e.g. README on GitHub)
     dark_svg = PREVIEWS_DIR / "logo-dark.svg"
-    dark_svg.write_text(LOGO_SVG.read_text().replace("#FFFFFF", "#0B0D12"))
-    render_svg(dark_svg, BRANDING_DIR / "logo" / "project-os-logo-dark-256.png", 256)
+    dark_svg.write_text(LOGO_SVG.read_text().replace("#FFFFFF", LOGO_ON_LIGHT_COLOR))
+    render_svg(dark_svg, BRANDING_DIR / "logo" / "luan-logo-dark-256.png", 256)
     dark_svg.unlink()
     render_svg(LOGO_SVG, THEME_DIR / "logo.png", 96)
 

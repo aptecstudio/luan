@@ -1,0 +1,127 @@
+<!doctype html>
+<!-- Luán logo concept, main logo (D-062): an artboard of the design canvas
+     the logo was chosen on, kept as its source. The final logo is
+     branding/logo/luan-logo.svg. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Luán, main logo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="
+    width: 1200px;
+    height: 720px;
+    box-sizing: border-box;
+    background: {{sky}};
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 56px;
+    font-family: 'Outfit', system-ui, sans-serif;
+    position: relative;
+    overflow: hidden">
+<svg
+    width="300"
+    height="300"
+    viewBox="0 0 200 200"
+    role="img"
+    aria-label="Crescent moon with three stars">
+<defs>
+<mask id="luanCrescentMain">
+<rect width="200" height="200" fill="black"></rect>
+<circle cx="96" cy="104" r="82" fill="white"></circle>
+<circle cx="132" cy="78" r="68" fill="black"></circle>
+</mask>
+</defs>
+<rect width="200" height="200" fill="{{moon}}" mask="url(#luanCrescentMain)"></rect>
+<g fill="{{star}}">
+<path transform="translate(134 96) scale(24)" d="M0,-1
+    C0.14,-0.14 0.14,-0.14 1,0
+    C0.14,0.14 0.14,0.14 0,1
+    C-0.14,0.14 -0.14,0.14 -1,0
+    C-0.14,-0.14 -0.14,-0.14 0,-1Z"></path>
+<path transform="translate(150 130) scale(12)" d="M0,-1
+    C0.14,-0.14 0.14,-0.14 1,0
+    C0.14,0.14 0.14,0.14 0,1
+    C-0.14,0.14 -0.14,0.14 -1,0
+    C-0.14,-0.14 -0.14,-0.14 0,-1Z"></path>
+<path transform="translate(112 52) scale(9)" d="M0,-1
+    C0.14,-0.14 0.14,-0.14 1,0
+    C0.14,0.14 0.14,0.14 0,1
+    C-0.14,0.14 -0.14,0.14 -1,0
+    C-0.14,-0.14 -0.14,-0.14 0,-1Z"></path>
+</g>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="
+    font-size: 168px;
+    font-weight: 300;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: {{moon}}">Luán</div>
+<div style="
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: #9AA3C7;
+    padding-left: 6px">operating system</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{
+  "sky": {
+    "editor": "color",
+    "default": "#0E1330",
+    "options": [
+      "#0E1330",
+      "#141413",
+      "#1B2A4A"
+    ]
+  },
+  "moon": {
+    "editor": "color",
+    "default": "#FFFFFF",
+    "options": [
+      "#FFFFFF",
+      "#E8ECF7",
+      "#C9D3EE"
+    ]
+  },
+  "star": {
+    "editor": "color",
+    "default": "#FFFFFF",
+    "options": [
+      "#FFFFFF",
+      "#E8ECF7",
+      "#C9D3EE"
+    ]
+  },
+  "$preview": {
+    "width": 1200,
+    "height": 720
+  }
+}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+sky: this.props.sky ?? '#0E1330',
+moon: this.props.moon ?? '#FFFFFF',
+star: this.props.star ?? '#FFFFFF'
+};
+}
+}
+</script>
+</body>
+</html>

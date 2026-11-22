@@ -1,4 +1,4 @@
-# project-os — build for desktop amd64 (Intel/AMD)
+# Luán — build for desktop amd64 (Intel/AMD)
 #
 # Usage: kas build kas/desktop-amd64.yml
 # Development, with passwordless root login and testing in QEMU:
@@ -9,9 +9,9 @@ header:
   includes:
     - kas/base.yml
 
-machine: project-os-amd64
+machine: luan-amd64
 
 repos:
-  project-os:
+  luan:
     layers:
-      layers/meta-project-os-desktop:
+      layers/meta-luan-desktop:

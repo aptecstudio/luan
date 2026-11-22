@@ -1,17 +1,17 @@
 # AGENTS.md — Guide for AI agents and people
 
-> **Status:** v1.5 — created on 2026-11-11. Every change made with the user's explicit
+> **Status:** v1.6 — created on 2026-11-11. Every change made with the user's explicit
 > authorization; the history of this file is in git.
 > **This file is locked.** See §2 before proposing any change.
 
 ## 1. Purpose
 
-This file is the entry point of **project-os** for anyone who works on it, AI agents or
+This file is the entry point of **Luán** for anyone who works on it, AI agents or
 people. It explains how the project is organized, where to find the progress made, the
 strategies adopted and the **why** of every choice, so that every contribution starts
 from the same context.
 
-project-os is an operating system **built from source starting from the Linux kernel**,
+Luán is an operating system **built from source starting from the Linux kernel**,
 with a **single user space for desktop and mobile (on an Android base)**, reduced to the
 essentials, with a **native** graphical interface: apps written in **Lua** on our own
 graphics framework over **EGL** (Wayland), and web content through **WebKit** (WPE) in
@@ -115,7 +115,7 @@ understand for someone who has never seen it.
    | JavaScript | `camelCase` for variables and functions, `PascalCase` for classes, `UPPER_SNAKE_CASE` for constants; ES modules style, 2-space indentation | ESLint, Prettier |
    | Python | PEP 8 (names, layout), PEP 257 (docstrings), type hints | `ruff check`, `ruff format --check` |
    | POSIX shell | POSIX `sh`; `lower_snake_case` for functions and local variables, `UPPER_SNAKE_CASE` for environment variables and constants; 4-space indentation; quoted expansions | ShellCheck |
-   | BitBake (recipes, classes, configuration) | OpenEmbedded style guide: variable order, 4-space indentation in functions, `lower_snake_case` function names with the `project_os_` prefix | `oelint-adv` |
+   | BitBake (recipes, classes, configuration) | OpenEmbedded style guide: variable order, 4-space indentation in functions, `lower_snake_case` function names with the `luan_` prefix | `oelint-adv` |
    | systemd units, kas YAML, kernel fragments, GRUB, wic | the upstream documentation's format, one setting per line, grouped by purpose | review |
 
 2. **Readable layout:** one blank line between logical blocks, two before top-level

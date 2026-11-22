@@ -1,11 +1,11 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="branding/logo/project-os-logo-256.png">
-    <img src="branding/logo/project-os-logo-dark-256.png" alt="project-os" width="96">
+    <source media="(prefers-color-scheme: dark)" srcset="branding/logo/luan-logo-256.png">
+    <img src="branding/logo/luan-logo-dark-256.png" alt="Luán" width="96">
   </picture>
 </p>
 
-<h1 align="center">project-os</h1>
+<h1 align="center">Luán</h1>
 
 <p align="center">
   An operating system built from scratch on the Linux kernel, with a native interface
@@ -21,9 +21,9 @@
 
 ## What it is
 
-project-os is an operating system for **Intel and AMD PCs** and for **smartphones and
+Luán is an operating system for **Intel and AMD PCs** and for **smartphones and
 tablets**. Everything you see on screen (panels, windows, settings, dialogs, even the
-installer) is a native app written in **Lua**, on project-os's own graphics framework
+installer) is a native app written in **Lua**, on Luán's own graphics framework
 drawn on the GPU through **EGL**; apps describe their screens in Lua or in XML. Web pages
 are shown by the **WebKit** engine, only in web views and in the browser. Underneath
 there is an essential Linux system, built piece by piece from source, without starting
@@ -33,7 +33,7 @@ from an existing distribution.
 
 - **One interface, everywhere.** PC and phone run the same system and the same apps;
   only the way they adapt to the screen and to touch changes.
-- **Your devices working together.** PCs and phones with project-os recognize each
+- **Your devices working together.** PCs and phones with Luán recognize each
   other and cooperate, as an ecosystem:
   - files and links sent from one device to another;
   - shared clipboard;
@@ -57,7 +57,7 @@ from an existing distribution.
 <p align="center">
   <img src="branding/previews/grub-menu.png" alt="Boot menu preview" width="720">
   <br>
-  <sub>Boot menu preview, with the placeholder logo.</sub>
+  <sub>Boot menu preview, with the Luán logo.</sub>
 </p>
 
 ## What it will run on
@@ -118,8 +118,8 @@ not work: the build needs Linux owners, permissions and links.
 One script installs everything, as a normal user (it asks for the `sudo` password):
 
 ```sh
-git clone https://github.com/aptecstudio/project-os.git ~/project-os
-cd ~/project-os
+git clone https://github.com/aptecstudio/luan.git ~/luan
+cd ~/luan
 tools/setup-host.sh          # add --yes to answer "yes" to every question
 ```
 
@@ -133,7 +133,7 @@ It can be run again at any time. What it installs and sets up:
 | Branding | `librsvg2-bin python3-pil python3-numpy fonts-inter` | regenerate the logo and boot menu images |
 | kas, style checks | `kas`, `ruff`, `shellcheck-py`, `oelint-adv` (through pipx, in `~/.local/bin`) | start the build; `tools/lint.sh` |
 | Settings | `en_US.UTF-8` locale, `kvm` group, user namespaces on Ubuntu (asks first) | required by bitbake and the emulator |
-| Development keys | `~/.config/project-os/keys`, outside the repository | sign the test updates |
+| Development keys | `~/.config/luan/keys`, outside the repository | sign the test updates |
 
 At the end the script checks every tool and lists what is missing, if anything. Then
 **open a new terminal** (log out and back in if it added you to the `kvm` group).
@@ -196,6 +196,6 @@ contributors, people or AI agents, in [`AGENTS.md`](AGENTS.md).
 
 ## License
 
-The project-os code is released under the [GNU GPL v3](LICENSE) license. The WebKit
+The Luán code is released under the [GNU GPL v3](LICENSE) license. The WebKit
 fork keeps WebKit's original licenses. The Inter font, used in the boot menu, is
 distributed under the SIL Open Font License 1.1.

@@ -1,4 +1,4 @@
-# Working on project-os from your own PC
+# Working on Luán from your own PC
 
 How to download the project, build the desktop image and test it in the QEMU emulator.
 Status: Phase 1 (base system), November 2026.
@@ -29,14 +29,14 @@ enough from Phase 2 on, when WPE WebKit and Skia are compiled.
 ## 2. Download the project and prepare the machine
 
 ```sh
-git clone https://github.com/aptecstudio/project-os.git
-cd project-os
+git clone https://github.com/aptecstudio/luan.git
+cd luan
 tools/setup-host.sh
 ```
 
 `setup-host.sh` installs the programs for Yocto, kas, QEMU and the UEFI firmware, the
 code style tools and the branding tools, and creates the **development keys** to sign
-updates in `~/.config/project-os/keys` (outside the repository). It asks for
+updates in `~/.config/luan/keys` (outside the repository). It asks for
 confirmation before changing system settings (`--yes` answers for you). At the end it
 checks every tool and lists what is missing; the full list of packages is in
 [`README.md`](../README.md#1-install-the-dependencies).
@@ -80,7 +80,7 @@ Other commands (they also work with `--low-resources`):
 the build can also be started directly with [kas](https://kas.readthedocs.io):
 
 ```sh
-export PROJECT_OS_KEYS=~/.config/project-os/keys
+export LUAN_KEYS=~/.config/luan/keys
 kas build kas/desktop-amd64.yml:kas/dev.yml                          # default
 kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml    # low resources
 ```
@@ -101,7 +101,7 @@ tools/run-qemu.sh --with-disk=other.img   # a second disk, e.g. with another sys
 
 What to expect today:
 
-1. GRUB boot menu with the project-os theme and the "project-os" entry, booted
+1. GRUB boot menu with the Luán theme and the "Luán" entry, booted
    automatically after 5 seconds; from UEFI, Windows and the other known systems found
    on the disks get their own entry;
 2. kernel and systemd start;
@@ -113,7 +113,7 @@ There is no graphical interface yet: it comes with Phases 2 (graphics framework 
 compositor) and 5 (shell).
 
 **Testing an update.** `tools/build.sh update` produces the signed bundle in
-`build/tmp/deploy/images/project-os-amd64/`. Inside the emulator, download it (for
+`build/tmp/deploy/images/luan-amd64/`. Inside the emulator, download it (for
 example from a local web server on the build host, which QEMU reaches at `10.0.2.2`)
 and install it with `rauc install <file>.raucb`: on reboot the system starts from the
 other copy, and goes back to the previous one by itself if 3 boots in a row do not
@@ -123,10 +123,10 @@ complete.
 it is not protected. Inside the system, run:
 
 ```sh
-project-os-data-key setup          # recovery key, then password; removes the empty key
-project-os-data-key status         # which keys open the data partition
-project-os-data-key password       # change the password (or set a new one with the recovery key)
-project-os-data-key recovery-key   # replace the recovery key
+luan-data-key setup          # recovery key, then password; removes the empty key
+luan-data-key status         # which keys open the data partition
+luan-data-key password       # change the password (or set a new one with the recovery key)
+luan-data-key recovery-key   # replace the recovery key
 ```
 
 From the next boot the password is asked on the screen (in the QEMU window, not in the
@@ -136,12 +136,12 @@ layout at that prompt is the US one, like the system's console.
 ## 5. Current limitations
 
 - **Data protection by command:** until the setup of Phase 8 exists, the data
-  partition stays unprotected until `project-os-data-key setup` is run; the empty key
+  partition stays unprotected until `luan-data-key setup` is run; the empty key
   also adds about 2 s to every boot after the setup (D-058). No TPM unlocking yet
   (Phase 8).
 - **Changes to `/etc`** (network, users, host name) are kept on the encrypted data
   partition and survive reboots and updates; if an update changes a file you edited,
-  your version is kept and the file is listed in `/var/lib/project-os/etc-conflicts`.
+  your version is kept and the file is listed in `/var/lib/luan/etc-conflicts`.
 - **Android / mobile emulator:** not yet, it comes with Phase 7.
 
 ## 6. If something goes wrong
@@ -158,7 +158,7 @@ layout at that prompt is the US one, like the system's console.
   directory.
 - **Error about namespaces or "unshare":** run `tools/setup-host.sh` again and accept
   the AppArmor change (see the explanation in the script).
-- **Error about the keys:** check that `~/.config/project-os/keys/ca.cert.pem` exists,
+- **Error about the keys:** check that `~/.config/luan/keys/ca.cert.pem` exists,
   or create the keys with `tools/gen-dev-keys.sh`.
 - **The emulator does not start or is extremely slow:** check that `/dev/kvm` exists and
   that your user is in the `kvm` group (`groups`).
@@ -173,7 +173,7 @@ layout at that prompt is the US one, like the system's console.
 | `AGENTS.md`, `MEMORY.md`, `ROADMAP.md` | rules, decisions, project status |
 | `kas/` | build configuration |
 | `layers/` | Yocto recipes: distribution, image, machine, kernel, boot |
-| `branding/` | placeholder logo and boot menu theme |
+| `branding/` | logo, its design concept and the boot menu theme |
 | `tools/` | scripts from this guide and checking tools (`lint.sh` for the code style) |
 | `ruff.toml`, `.shellcheckrc`, `tools/oelint-constants.json` | settings of the style checks |
 | `build/`, `sources/` | created by the build, not versioned |

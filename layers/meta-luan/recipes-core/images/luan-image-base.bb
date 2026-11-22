@@ -1,0 +1,55 @@
+SUMMARY = "Luán — base image"
+DESCRIPTION = "Minimal system: kernel, glibc, systemd. Boots to a text terminal. The \
+               next layers (graphics, broker, shell) are added in the following phases \
+               of the roadmap."
+HOMEPAGE = "https://github.com/aptecstudio/luan"
+LICENSE = "GPL-3.0-only"
+
+inherit core-image
+
+# Only what is needed to boot (AGENTS.md §5.5), plus what the machine declares for its
+# own hardware (kernel modules, firmware: MACHINE_EXTRA_RRECOMMENDS).
+# packagegroup-core-boot does not include them by itself.
+IMAGE_INSTALL = "packagegroup-core-boot ${MACHINE_EXTRA_RRECOMMENDS} ${CORE_IMAGE_EXTRA_INSTALL}"
+
+# No kernel or initramfs in the system slot: the hardware layer puts them where its
+# boot loader reads them (desktop: on the EFI partition, as a unified kernel image and
+# as separate files, luan_slot_boot, D-048). The kernel modules stay in the slot
+# (MACHINE_EXTRA_RRECOMMENDS).
+
+# Signed A/B updates (D-018, D-026)
+IMAGE_INSTALL += "rauc"
+# Network, Bluetooth and audio services (D-061)
+IMAGE_INSTALL += "packagegroup-luan-services"
+# Recommended packages we do not want (R-02):
+#   squashfs-tools     bundles are mounted with the kernel driver
+#   busybox-udhcpc     second DHCP client: NetworkManager already does DHCP
+#   kbd-keymaps-pine   keyboard layouts for Pine64 devices only
+#   nftables           NetworkManager's firewall for sharing a connection (hotspot),
+#                      not used yet (D-061)
+BAD_RECOMMENDATIONS += "squashfs-tools busybox-udhcpc kbd-keymaps-pine nftables"
+
+# Read-only system (D-018); data lives on the encrypted partition mounted on /var
+IMAGE_FEATURES += "read-only-rootfs"
+
+# No package manager in the image (D-018)
+IMAGE_FEATURES:remove = "package-management"
+
+# /home lives on the data partition: in the image it becomes a link to /var/home
+ROOTFS_POSTPROCESS_COMMAND += "luan_home_on_data"
+luan_home_on_data[doc] = "Replace /home with a link to /var/home on the data partition"
+luan_home_on_data() {
+    rm -rf ${IMAGE_ROOTFS}/home
+    ln -s var/home ${IMAGE_ROOTFS}/home
+    tmpfiles_dir=${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d
+    install -d $tmpfiles_dir
+    echo "d ${localstatedir}/home 0755 root root -" > $tmpfiles_dir/luan-home.conf
+}
+
+# Mount point of the EFI partition (efi.mount): on the read-only system systemd cannot
+# create it at boot. Root-only access, like the mounted ESP (umask=0077).
+ROOTFS_POSTPROCESS_COMMAND += "luan_efi_mountpoint"
+luan_efi_mountpoint[doc] = "Create the /efi mount point of the EFI partition"
+luan_efi_mountpoint() {
+    install -d -m 0700 ${IMAGE_ROOTFS}/efi
+}

@@ -1,7 +1,7 @@
-# project-os — GRUB theme (D-009, D-023)
+# Luán — GRUB theme (D-009, D-023)
 #
 # Centered boot menu with logo. The .pf2 fonts are not in the repository: the
-# project-os-grub-theme recipe makes them with grub-mkfont from the Inter font
+# luan-grub-theme recipe makes them with grub-mkfont from the Inter font
 # (OFL-1.1 license) and installs them next to this file (step 5b, D-060):
 #   Inter Regular 14, Inter Regular 18, Inter Medium Regular 18,
 #   Inter SemiBold Regular 28
@@ -32,10 +32,10 @@ terminal-box: "terminal_box_*.png"
   align = "center"
   font = "Inter SemiBold Regular 28"
   color = "#F2F4F8"
-  text = "project-os"
+  text = "Luán"
 }
 
-# Boot entries (project-os, and Windows and other systems found by GRUB, D-060)
+# Boot entries (Luán, and Windows and other systems found by GRUB, D-060)
 + boot_menu {
   left = 50%-260
   top = 20%+180

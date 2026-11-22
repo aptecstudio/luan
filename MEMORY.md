@@ -43,7 +43,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 | R-30 | **Dynamic script loading with `include("url")`** and its counterpart **`includeAsync("url")`**, not with the language's own module system. Each included script exposes its symbols to the includer through its exports; included scripts are cached; cyclic imports are prevented. |
 | R-31 | **Isolated root for each app:** scripts, images and other resources are loaded only from there, with a dedicated protocol (`app://`), and only the app itself can access its own resources. External files only through the filesystem system APIs. |
 | R-32 | **Design:** a hybrid of Windows 11, macOS Big Sur and Xiaomi MIUI. |
-| R-33 | **Interoperability between devices:** the devices running project-os, desktop and mobile, cooperate as a single ecosystem, on the model of Apple's. |
+| R-33 | **Interoperability between devices:** the devices running Luán, desktop and mobile, cooperate as a single ecosystem, on the model of Apple's. |
 | R-34 | **UI framework `systemui`:** our own framework to build graphical interfaces (buttons, headers, footers, text fields and everything an interface needs), reached as `system.ui.*` like the other APIs (R-29). An app that wants it declares `systemui` in its `package.json`. Developers can create their own custom components. Apps (system apps included) do not write HTML: interfaces are written in Lua or XML (R-40), with a class and event model; the framework owns the component tree and its removal. |
 | R-35 | **Class and event model for the APIs:** the system APIs (`system.*`) also follow the class and event model, like `system.ui`. |
 | R-36 | **Developer guides:** a documentation folder of indexed Markdown pages for `systemui`, organized by component, written as a real guide for programmers on how to build interfaces with the framework; the same kind of guide for all the system APIs (`system.*`), organized by namespace. |
@@ -78,10 +78,10 @@ Set by the user (2026-11-11 to 2026-11-13).
   (file selection, permissions, password, authentication) as system dialogs of the
   shell, built with the native framework (D-054).
 - **Why:** R-10. It is the point where toolkits and the system services already ask for
-  an interaction; replacing it there also covers software not written for project-os.
+  an interaction; replacing it there also covers software not written for Luán.
 
 ### D-007 — Own Wayland compositor · `confirmed` (2026-11-11)
-- **What:** a minimal compositor written for project-os, in Rust on Smithay (D-013).
+- **What:** a minimal compositor written for Luán, in Rust on Smithay (D-013).
   Each app window is a separate Wayland surface; the shell (a native app of the
   framework, D-054) draws panels and decorations through *layer-shell* and decides
   window layout and animations through a private compositor ↔ shell protocol.
@@ -91,14 +91,13 @@ Set by the user (2026-11-11 to 2026-11-13).
   existing compositor (little control over animations).
 
 ### D-009 — Desktop boot menu: GRUB 2 with own theme · `confirmed` (2026-11-11)
-- **What:** GRUB 2 (UEFI, and BIOS with the same disk, D-059) with a project-os theme:
+- **What:** GRUB 2 (UEFI, and BIOS with the same disk, D-059) with a Luán theme:
   centered menu, logo at the top, own background and fonts (D-023, in the image since
   D-060). Windows and other systems are found by GRUB itself at every boot (D-060).
 - **Secure Boot:** with no upstream distribution there is no `shim` already signed by
-  Microsoft. Initial phase: project-os keys enrolled by the user
+  Microsoft. Initial phase: Luán keys enrolled by the user
   (MOK) during installation; getting a shim signed by Microsoft is a long-term goal.
-- **Logo:** generic SVG placeholder, exported to PNG for the theme, until the brand is
-  defined.
+- **Logo:** the Luán logo (D-062), an SVG exported to PNG for the theme.
 - **Why:** R-18. GRUB supports graphical themes, multiboot and Secure Boot.
 - **Discarded alternatives:** systemd-boot (no graphical theme); rEFInd (to be
   re-evaluated if GRUB turns out awkward to integrate).
@@ -129,8 +128,8 @@ Set by the user (2026-11-11 to 2026-11-13).
 ### D-012 — System built from source with Yocto/OpenEmbedded · `confirmed` (2026-11-11)
 - **What:** every component (toolchain, libc, libraries, WebKit, Skia, kernel) is compiled
   from source with Yocto/OpenEmbedded, on the current LTS branch. Our code lives in own
-  layers: `meta-project-os` (common user space, the same on all platforms),
-  `meta-project-os-desktop` and `meta-project-os-mobile` (hardware layer, D-014), plus
+  layers: `meta-luan` (common user space, the same on all platforms),
+  `meta-luan-desktop` and `meta-luan-mobile` (hardware layer, D-014), plus
   one layer for each mobile device.
 - **Discarded alternatives:** Buildroot (struggles with WebKit and with many
   devices), own tool in Rust (all to be written and maintained).
@@ -219,18 +218,20 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Why:** a diverging fork loses the official fixes, which are the vast majority of
   those available (WebKit is a project of millions of lines with a dedicated security
   team); an aligned one adds a layer of ours without giving them up.
-- **In Yocto:** the `wpewebkit` recipe of `meta-project-os` points to the fork and to
+- **In Yocto:** the `wpewebkit` recipe of `meta-luan` points to the fork and to
   the tag released by us.
 - **Repository:** `aptecstudio/WebKit`, fork of `WebKit/WebKit` with all branches.
   - `main`: copy of the official one, without our changes;
-  - `project-os/<version>`: our work branch, created from the stable branch
+  - `luan/<version>`: our work branch, created from the stable branch
     `webkitglib/<version>`; at each new stable release the next branch is created and
     our patches are re-applied;
   - first branch: `project-os/2.54`, from `webkitglib/2.54` (commit `2b614de`, created
-    on 2026-11-11; latest official release at that date: 2.54.2).
+    on 2026-11-11; latest official release at that date: 2.54.2). It keeps the
+    project's former name (D-062): renaming it would break the clones and links that
+    already point to it; the next branches follow `luan/<version>`.
 
 ### D-020 — GPL-3.0 license · `confirmed` (2026-11-11)
-- **What:** the project-os code is released under the GNU GPL v3 license (`LICENSE`
+- **What:** the Luán code is released under the GNU GPL v3 license (`LICENSE`
   file). The WebKit fork keeps WebKit's original licenses (LGPL/BSD).
 - **Why:** the user's choice; whoever modifies and distributes the system must publish
   its code, avoiding closed forks.
@@ -249,11 +250,12 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Discarded alternative:** starting from the runtime prototype on an existing
   distribution.
 
-### D-023 — Placeholder logo and GRUB theme · `confirmed` (2026-11-11)
+### D-023 — Logo images and GRUB theme · `confirmed` (2026-11-11)
 - **What:**
-  - generic logo in `branding/logo/project-os-logo.svg`, **monochrome white** (ring and
-    central dot) on a dark background, in the style of the elementary OS boot screen,
-    as asked by the user; it stays a **placeholder**, the final brand is to be decided;
+  - the logo (D-062) in `branding/logo/luan-logo.svg`, **monochrome white** on a dark
+    background, in the style of the elementary OS boot screen, as asked by the user;
+    exported to `luan-logo-{256,96}.png` and, in night blue for light backgrounds such
+    as the README on GitHub, to `luan-logo-dark-256.png`;
   - GRUB theme in `branding/grub-theme/`: logo and name at the top, centered entries
     520 px wide, selected entry highlighted by a light semi-transparent box, countdown
     and key help at the bottom;
@@ -261,7 +263,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     `rsvg-convert`, background and boxes with Pillow/NumPy); `branding/previews/`
     holds an approximate preview, which does not go into the image.
 - **Font:** Inter (OFL‑1.1 license). The `.pf2` files for GRUB are not in the
-  repository: the `project-os-grub-theme` recipe downloads Inter from the official
+  repository: the `luan-grub-theme` recipe downloads Inter from the official
   project and makes them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28;
   D-060).
 - **Background:** ordered dithering instead of noise, to avoid color banding with a
@@ -281,8 +283,8 @@ Set by the user (2026-11-11 to 2026-11-13).
   images. Discarded alternative: `bitbake-setup` (new in Yocto 6.0, still poorly
   documented).
 - **Sources without poky:** OpenEmbedded-Core and bitbake directly, with our
-  `project-os` distribution (`layers/meta-project-os/conf/distro/project-os.conf`).
-- **`project-os-amd64` machine:** baseline x86-64 instructions (D-027); `linux-yocto` 6.18 LTS
+  `luan` distribution (`layers/meta-luan/conf/distro/luan.conf`).
+- **`luan-amd64` machine:** baseline x86-64 instructions (D-027); `linux-yocto` 6.18 LTS
   kernel with the reference configuration for 64-bit PCs (`common-pc-64`), UEFI boot
   with GRUB.
 - **Excluded distribution features** (reasons in the distribution file): x11,
@@ -294,7 +296,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 
 ### D-025 — Kernel and firmware for desktop hardware · `confirmed` (2026-11-11)
 - **Configuration fragments** in
-  `layers/meta-project-os-desktop/recipes-kernel/linux/files/`, one per area: disks and
+  `layers/meta-luan-desktop/recipes-kernel/linux/files/`, one per area: disks and
   file systems, graphics, audio, Bluetooth, Wi‑Fi, wired network, input and platform.
   147 options, all checked against the Kconfig files of Linux 6.18.
 - **Built in (=y) only the boot drivers** (NVMe, SATA, ext4, FAT, UEFI framebuffer,
@@ -303,7 +305,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Graphics:** Intel (i915, xe), AMD (amdgpu, the first GCN too, and radeon), NVIDIA
   only with the free nouveau driver; drivers for virtual machines (QEMU, VirtualBox,
   VMware, Hyper‑V).
-- **Firmware:** `packagegroup-project-os-desktop-hw`, 27 `linux-firmware` packages plus
+- **Firmware:** `packagegroup-luan-desktop-hw`, 27 `linux-firmware` packages plus
   the Wi‑Fi frequency database; compressed with zstd.
 - **Own recipes** for what OpenEmbedded-Core does not have: Intel SOF audio firmware
   (D-039) and Intel microcode, loaded early (D-043).
@@ -319,7 +321,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   and firmware would be left out.
 
 ### D-026 — A/B partitions, boot and data partition · `confirmed` (2026-11-12)
-- **Disk layout (GPT)**, in `files/wic/project-os-ab.wks.in` (`.in` extension: bitbake
+- **Disk layout (GPT)**, in `files/wic/luan-ab.wks.in` (`.in` extension: bitbake
   substitutes variables such as `${EFI_PROVIDER}` in it):
   | # | Name | Size | Contents |
   |---|---|---|---|
@@ -328,24 +330,24 @@ Set by the user (2026-11-11 to 2026-11-13).
   | 3 | `root_a` | 4 GiB | system, copy A: erofs verified by dm-verity, read-only (D-047) |
   | 4 | `root_b` | 4 GiB | system, copy B, written by updates |
   | 5 | `data` | rest | data, created on first boot, encrypted, mounted on `/var` (`/home` → `/var/home`) by the initramfs (D-044) |
-- **Slot selection:** GRUB (`files/wic/project-os-grub.cfg`) boots the first valid slot
+- **Slot selection:** GRUB (`files/wic/luan-grub.cfg`) boots the first valid slot
   of `ORDER` that has not been given up; every slot has 3 boot attempts (D-058), and
   `rauc-mark-good` gives them back once the system is up. After 3 boots that did not
-  complete, it switches to the other slot. In the menu the active slot is called "project-os", the other one
-  "project-os (previous version)". `grubenv` values are `1`/`0`, like RAUC's reference
+  complete, it switches to the other slot. In the menu the active slot is called "Luán", the other one
+  "Luán (previous version)". `grubenv` values are `1`/`0`, like RAUC's reference
   layout: RAUC writes them that way, and `true`/`false` made every slot unbootable after
   the first update (found in QEMU).
 - **Updates:** RAUC (`recipes-core/rauc/files/system.conf`); bundles signed in *verity*
-  format, zstd-compressed (`project-os-bundle`). The CA certificate goes into the
-  image; keys outside the repository (`PROJECT_OS_KEYS`, `tools/gen-dev-keys.sh`).
+  format, zstd-compressed (`luan-bundle`). The CA certificate goes into the
+  image; keys outside the repository (`LUAN_KEYS`, `tools/gen-dev-keys.sh`).
 - **Data partition:** created by `systemd-repart` on the free space, LUKS2, works
   without TPM (R-27). Until step 4d the key is **empty** (placeholder, data not
   protected): the setup will enroll password and recovery key, and the TPM as an extra
   method where present (step 4d and Phase 8). `e2fsprogs-mke2fs` is needed: repart
   creates and encrypts the partition but formats it with `mkfs.ext4`.
-- **EFI partition mount:** `efi.mount` (`project-os-storage`) mounts it by the GPT label
+- **EFI partition mount:** `efi.mount` (`luan-storage`) mounts it by the GPT label
   `esp`, like the slots and the data partition, so every slot mounts it the same way;
-  the `/efi` directory is created at build time (`project_os_efi_mountpoint`, 0700),
+  the `/efi` directory is created at build time (`luan_efi_mountpoint`, 0700),
   because the read-only system cannot create it. Discarded: an fstab line written by
   wic (it is only on the first-installation disk, not in the slot image that updates
   write) or by the recipe (the FAT serial number changes at every build).
@@ -458,7 +460,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Inspiration, not copying:** visual language and behaviors are taken up, not icons,
   logos, wallpapers or other protected graphic elements of the three systems.
 
-### D-033 — Ecosystem of project-os devices · `proposed` (2026-11-11)
+### D-033 — Ecosystem of Luán devices · `proposed` (2026-11-11)
 - **What:** a system service in Rust (*continuity daemon*) that connects the devices of
   the same user. Planned features, in priority order (to be confirmed, DA-12):
   1. **pairing** of devices with a QR code or a numeric code; a key pair per device;
@@ -482,7 +484,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     declared in `package.json` (e.g. `devices.handoff`, `devices.share`);
   - every device can be revoked; revocation invalidates its keys on all the others;
   - protocol with a version number and negotiation, so that devices with different
-    project-os versions keep talking to each other (backward compatibility, R-25).
+    Luán versions keep talking to each other (backward compatibility, R-25).
 - **Device discovery:** Bluetooth LE for proximity, then local network. Today the
   distribution excludes `zeroconf` (Avahi): to decide whether to re-enable mDNS only for
   this service or to use an own announcement (DA-12).
@@ -540,7 +542,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   (`kas/desktop-amd64.yml:kas/dev.yml`, bitbake settings: all cores, work files kept).
   The low-resources mode (`kas/low-resources.yml`, D-034) stays as a second choice and
   is enabled only explicitly with `tools/build.sh --low-resources` or
-  `PROJECT_OS_LOW_RESOURCES=1`.
+  `LUAN_LOW_RESOURCES=1`.
 - **Resource check:** the script measures RAM and free space. In default mode it warns
   below 15 GB of RAM (a 16 GB PC shows a bit less) and, at the first build, below
   100 GB free (estimate: without `rm_work`; to be measured on the build host); with
@@ -603,12 +605,12 @@ Set by the user (2026-11-11 to 2026-11-13).
   | Purpose | Packages | Reason |
   |---|---|---|
   | Kernel | `kernel-base`, `kernel-modules` (meta-package of the modules) | the Linux kernel's modules; the kernel itself is on the EFI partition, in each slot's boot files (D-014, D-048) |
-  | Hardware | `packagegroup-project-os-desktop-hw`, `wireless-regdb-static` | firmware group and Wi‑Fi regulatory database (D-025) |
+  | Hardware | `packagegroup-luan-desktop-hw`, `wireless-regdb-static` | firmware group and Wi‑Fi regulatory database (D-025) |
   | Boot | `grub-efi`, `grub-common`, `grub-bootconf`, `grub-editenv`, `grub-locale-it` | GRUB boot menu (D-009); `grub-editenv` for RAUC (D-026) |
   | Init and devices | `systemd`, `systemd-conf`, `systemd-extra-utils`, `systemd-udev-rules`, `systemd-vconsole-setup`, `systemd-serialgetty`, `systemd-mime`, `udev`, `udev-hwdb`, `kmod`, `libkmod2`, `libsystemd0`, `libsystemd-shared`, `libudev1`, `libseccomp`, `libnss-myhostname2`, `libnss-resolve2`, `libnss-systemd2`, `volatile-binds` | systemd as init (D-016) and its direct dependencies; `systemd-serialgetty` for the serial console |
   | Network | `systemd-networkd`, `netbase` | network configuration (DHCP included); protocol and service tables |
   | IPC | `dbus-1`, `dbus-common`, `dbus-tools`, `libdbus-1-3`, `libexpat1` | D-Bus, needed by systemd and by RAUC's service |
-  | Encryption and storage | `cryptsetup`, `systemd-crypt`, `libdevmapper`, `project-os-storage`, `e2fsprogs-mke2fs`, `e2fsprogs-e2fsck`, `libext2fs2`, `libe2p2`, `libcom-err2`, `dosfstools`, `util-linux-fsck`, `util-linux-mount`, `util-linux-umount`, `libmount1`, `libblkid1`, `libfdisk1`, `libsmartcols1`, `libuuid1` | LUKS2 data partition, repart, mounts and file system checks (D-026, D-038) |
+  | Encryption and storage | `cryptsetup`, `systemd-crypt`, `libdevmapper`, `luan-storage`, `e2fsprogs-mke2fs`, `e2fsprogs-e2fsck`, `libext2fs2`, `libe2p2`, `libcom-err2`, `dosfstools`, `util-linux-fsck`, `util-linux-mount`, `util-linux-umount`, `libmount1`, `libblkid1`, `libfdisk1`, `libsmartcols1`, `libuuid1` | LUKS2 data partition, repart, mounts and file system checks (D-026, D-038) |
   | Updates | `rauc`, `rauc-conf`, `rauc-service`, `rauc-mark-good`, `libglib-2.0-0`, `libjson-glib-1.0-0`, `libnl-3-200`, `libnl-genl-3-200`, `libcurl4`, `libnghttp2-14`, `libidn2-0`, `libunistring5`, `libffi8`, `libpcre2`, `shared-mime-info`, `shared-mime-info-data`, `libxml2` | signed A/B updates (D-018, D-026). `libcurl` (with `nghttp2`, `idn2`) and `libnl` come from RAUC's default `network` and `streaming` features: kept for installing updates directly over HTTPS (Phase 8); `shared-mime-info` and `libxml2` are required by GLib |
   | Crypto and certificates | `libssl3`, `libcrypto3`, `openssl`, `openssl-bin`, `openssl-conf`, `ca-certificates` | bundle signature checking (RAUC), HTTPS for updates; certificate authorities for HTTPS |
   | Login and accounts | `libpam`, `libpam-runtime`, `pam-plugin-*` (deny, env, faildelay, group, keyinit, limits, loginuid, mail, motd, namespace, nologin, permit, rootok, securetty, shells, umask, unix, warn), `shadow-base`, `shadow-securetty`, `util-linux-agetty`, `util-linux-sulogin`, `libcrypt2` | authentication (`pam` distribution feature, logind), text login, emergency shell |
@@ -630,9 +632,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   is written).
 
 ### D-039 — Intel SOF audio firmware from sof-bin · `confirmed` (2026-11-12)
-- **What:** own recipe `sof-bin` (`layers/meta-project-os-desktop/recipes-bsp/sof-bin/`),
+- **What:** own recipe `sof-bin` (`layers/meta-luan-desktop/recipes-bsp/sof-bin/`),
   version 2026.09.2, from the official releases of the SOF project
-  (`github.com/thesofproject/sof-bin`), added to `packagegroup-project-os-desktop-hw`.
+  (`github.com/thesofproject/sof-bin`), added to `packagegroup-luan-desktop-hw`.
   The tarball is pinned by SHA-256, the same digest GitHub publishes for the release
   asset. Installed in `/lib/firmware/intel` with the upstream layout (`sof`,
   `sof-ipc4`, `sof-ipc4-lib`, `sof-ipc4-tplg`, `sof-tplg`, `sof-ace-tplg` link).
@@ -688,7 +690,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   `do_kernel_configcheck` does not report options dropped for a missing dependency, and
   `tools/check-kernel-fragments.py` checks only names and types (D-025).
 - **What:**
-  - new task `do_project_os_configcheck` in the kernel bbappend, after
+  - new task `do_luan_configcheck` in the kernel bbappend, after
     `do_kernel_configcheck` and before `do_compile`: every `CONFIG_…` line (and every
     "is not set") of our fragments must be in the final `.config` with the same
     value, otherwise the build stops listing file, line, requested and actual value;
@@ -735,21 +737,21 @@ Set by the user (2026-11-11 to 2026-11-13).
   chain).
 
 ### D-043 — systemd initramfs and early microcode (steps 4c.1 and 3b) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
-- **initramfs** (`project-os-initramfs`, in `meta-project-os`): systemd in initrd mode
+- **initramfs** (`luan-initramfs`, in `meta-luan`): systemd in initrd mode
   (`/init` → systemd, `/etc/initrd-release` from `os-release`). It opens the slot with
   dm-verity (D-047), checks and mounts it on `/sysroot`, prepares the data partition and
   the `/etc` overlay (D-044) and switches to it. Packages: `systemd`, `udev`, udev
   rules, `mount`, `fsck`, `e2fsck`, `os-release`, BusyBox, without recommendations;
   systemd's hard dependencies (PAM, D-Bus, OpenSSL, kbd, cryptsetup libraries…) come
   along. `cpio.zst`: about 19 MB — to be slimmed in the size budget.
-- **Microcode** (`project-os-microcode`, in `meta-project-os-desktop`): builds
+- **Microcode** (`luan-microcode`, in `meta-luan-desktop`): builds
   `microcode.cpio`, an uncompressed archive with `kernel/x86/microcode/GenuineIntel.bin`
   (all of `intel-ucode/` from Intel's official release `microcode-20261110`, pinned to
   the commit of its tag; `intel-ucode-with-caveats/` left out, as Intel advises) and
   `AuthenticAMD.bin` (the `amd-ucode` containers of linux-firmware 20260410, the same
   file and digest as OE-Core's recipe). Reproducible: fixed times and owner, sorted
   entries. 19.5 MB.
-- **Boot:** the machine lists early archives in `PROJECT_OS_EARLY_INITRD`; they are put
+- **Boot:** the machine lists early archives in `LUAN_EARLY_INITRD`; they are put
   uncompressed and first, before the initramfs, in each slot's UKI and in the BIOS boot
   files on the EFI partition (D-048): the kernel finds the microcode at the start of
   the first archive, as early loading requires.
@@ -770,9 +772,9 @@ Set by the user (2026-11-11 to 2026-11-13).
 ### D-044 — Persistent /etc overlay, data partition handled by the initramfs (step 4c.2) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
 - **Data partition in the initramfs:** `/etc` is needed before the system starts, so
   creation, unlocking and mounting of the data partition move from the system to the
-  initramfs (package `project-os-storage-initrd`, added by the machine through
-  `PROJECT_OS_INITRD_INSTALL`):
-  - `project-os-repart.service`: after `/sysroot` is mounted, `systemd-repart
+  initramfs (package `luan-storage-initrd`, added by the machine through
+  `LUAN_INITRD_INSTALL`):
+  - `luan-repart.service`: after `/sysroot` is mounted, `systemd-repart
     --root=/sysroot` reads the partition definition of the system
     (`/usr/lib/repart.d/50-data.conf`, which stays in one place) and works on the disk
     of the slot. systemd's own initrd repart service looks inside the initramfs and
@@ -781,16 +783,16 @@ Set by the user (2026-11-11 to 2026-11-13).
   - `sysroot-var.mount`: fsck of the data partition, then mount on `/sysroot/var`; the
     mount stays after the switch as `/var`. The system itself has no `crypttab` or
     `var.mount`.
-- **`/etc` overlay** (`project-os-etc-overlay.service`, before `initrd-fs.target`):
+- **`/etc` overlay** (`luan-etc-overlay.service`, before `initrd-fs.target`):
   lower layer the read-only `/etc` of the slot, upper and work directories in
-  `/var/lib/project-os/etc-overlay/` on the encrypted data partition. Kernel:
+  `/var/lib/luan/etc-overlay/` on the encrypted data partition. Kernel:
   `CONFIG_OVERLAY_FS=y` (built in, no modules in the initramfs). BusyBox added to the
   initramfs (`mkdir`, and `/bin/sh` for the emergency shell).
-- **Update conflicts** (`/usr/lib/project-os/etc-overlay-conflicts`, RAUC
+- **Update conflicts** (`/usr/lib/luan/etc-overlay-conflicts`, RAUC
   post-install handler): mounts the booted slot without the overlay (non-recursive
   bind mount of `/`) and the new slot read-only, and for every file changed or deleted
   locally (upper layer) checks whether the update changes it; the list goes to
-  `/var/lib/project-os/etc-conflicts` and to RAUC's log. The local version is kept; the
+  `/var/lib/luan/etc-conflicts` and to RAUC's log. The local version is kept; the
   update never fails because of it.
 - **`ldconfig.service` masked:** with a writable `/etc` it wrote `ld.so.cache` into the
   overlay, a copy that could go stale after an update and hide the cache of the new
@@ -852,7 +854,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Tools** (run together by `tools/lint.sh`, installed by `tools/setup-host.sh` through
   pipx, no root needed): ShellCheck (`shellcheck-py`, `.shellcheckrc`), ruff for PEP 8
   and PEP 257 (`ruff.toml`), oelint-adv for the OpenEmbedded style guide
-  (`tools/oelint-constants.json` declares the RAUC and project-os variables it does not
+  (`tools/oelint-constants.json` declares the RAUC and Luán variables it does not
   know). Rust (`cargo fmt`, `clippy`), Luau (StyLua, selene,
   `luau-analyze`), XML layouts (schema validation) and JavaScript (ESLint, Prettier)
   are run as soon as the repository has code in that language (AGENTS.md §7).
@@ -874,9 +876,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   - BitBake: multi-line values without leading space (except `:append`, where it is
     needed), descriptions within 88 columns, `HOMEPAGE`, alphabetical dependencies,
     `DEPENDS +=`, `${localstatedir}`, `[doc]` for every custom task and function,
-    recipe files with a version (`project-os-storage_1.0.bb`,
-    `project-os-boot-config_1.0.bb`); **bbappends limited to our distribution or
-    machine** (`:project-os`, `:project-os-amd64`), so the layers stay usable next to
+    recipe files with a version (`luan-storage_1.0.bb`,
+    `luan-boot-config_1.0.bb`); **bbappends limited to our distribution or
+    machine** (`:luan`, `:luan-amd64`), so the layers stay usable next to
     others ("Yocto Project compatible" rule). Final values of 23 affected variables
     compared before and after: same effect (only order and wording differ).
 - **Why:** the repository is public and must be understandable by any developer; tools
@@ -891,13 +893,13 @@ Set by the user (2026-11-11 to 2026-11-13).
   `type=raw`). Kernel: `CONFIG_EROFS_FS=y`.
 - **Root hash:** in the kernel command line of each slot's boot files on the EFI
   partition (the UKI and `boot.env`, D-048), generated at build time by
-  `project_os_slot_boot.bbclass` from the parameters of `image_types_verity`.
+  `luan_slot_boot.bbclass` from the parameters of `image_types_verity`.
 - **Kernel command line:** `root=/dev/mapper/root rootfstype=erofs roothash=…
   systemd.verity_root_data=PARTLABEL=root_x systemd.verity_root_hash=PARTLABEL=root_x
   systemd.verity_root_options=…`: systemd-veritysetup-generator in the initramfs
   (already there with systemd's `cryptsetup` feature) opens the slot before mounting
   it.
-- **Updates:** the bundle hook (`project-os-bundle-hook`, `slot-post-install`) writes the
+- **Updates:** the bundle hook (`luan-bundle-hook`, `slot-post-install`) writes the
   slot's boot files (D-048). RAUC runs slot hooks after writing the slot and **before**
   marking it bootable, while the system post-install handler runs only after the
   marking (checked in RAUC 1.15.2's source): if the hook fails, the slot stays not
@@ -910,7 +912,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   the message on screen (a PC far from its user would wait forever).
 - **Boot menu tracked by the build:** `grub.cfg` reaches wic only through the
   `bootloader --configfile` line, which bitbake does not track; the machine adds the
-  file to `do_image_wic[file-checksums]`, through `PROJECT_OS_DESKTOP_LAYERDIR` set in
+  file to `do_image_wic[file-checksums]`, through `LUAN_DESKTOP_LAYERDIR` set in
   `layer.conf`.
 - **Discarded alternatives:** ext4 with dm-verity (it works only if ext4 never tries
   to write, e.g. no journal replay; erofs is read-only by design and has no unused
@@ -933,9 +935,9 @@ Set by the user (2026-11-11 to 2026-11-13).
 
 ### D-048 — Unified kernel image per slot on the EFI partition, lz4hc slots (step 4c.4) · `confirmed` (2026-11-12, on the `build/verified-boot` branch)
 - **Boot files out of the slot:** each slot's boot files live on the EFI partition, in
-  `EFI/project-os/A` and `EFI/project-os/B`, built by `project_os_slot_boot.bbclass`
+  `EFI/luan/A` and `EFI/luan/B`, built by `luan_slot_boot.bbclass`
   as `<image>.slot-boot/`:
-  - `project-os.efi`: **unified kernel image (UKI)** made with `ukify` (systemd 259):
+  - `luan.efi`: **unified kernel image (UKI)** made with `ukify` (systemd 259):
     systemd-boot stub, kernel, CPU microcode then initramfs (the microcode must be
     first and uncompressed), `os-release`, and the kernel command line with the
     dm-verity root hash. GRUB starts it with `chainloader … @0` (slot A) or `@1`;
@@ -953,7 +955,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   Profile 0 is also what runs if the UKI is started with no argument. Found while
   building: joining both slots as separate profiles makes `ukify` add an empty base
   profile (`ID=main`, no command line) as `@0`.
-- **One command line, from the build:** `PROJECT_OS_KERNEL_CMDLINE` in the machine, with
+- **One command line, from the build:** `LUAN_KERNEL_CMDLINE` in the machine, with
   the reason of each option; the class adds root hash, tree parameters and the slot's
   part. `grub.cfg` composes no kernel options: it reads `cmdline_x` from each slot's `boot.env` (only that name) and never chooses a
   slot without it.
@@ -990,7 +992,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   slot A, profiles `slot-a` and `slot-b`, the second with its own `.cmdline`). Slot A
   boots through the UKI (no `BOOT_IMAGE=` from GRUB), `/dev/mapper/root` verified on
   `nvme0n1p3`, erofs lz4hc, system `running`, no failed units, free memory as before
-  (about 1.87 GB of 2 GB). A/B update: the hook writes `EFI/project-os/B`, B boots with
+  (about 1.87 GB of 2 GB). A/B update: the hook writes `EFI/luan/B`, B boots with
   profile `@1` of its own UKI (`root_b`, `rauc.slot=B`) and is confirmed. Interrupted
   boot of B → A. One corrupted block in B (block 119138, the first compressed block of
   `/usr/lib/systemd/systemd`), B re-armed, one `reboot`: the firmware starts twice by
@@ -1189,9 +1191,9 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **What gets published at every release:**
   | Target | File | Use |
   |---|---|---|
-  | Desktop amd64 | `project-os-<version>-amd64.iso` | installer (D-010): **hybrid ISO**, boots from USB stick and DVD, UEFI and BIOS (R-26); written with Rufus, Etcher, Ventoy or `dd` |
-  | Each phone model | `project-os-<version>-<device>-fastboot.zip` | images plus flashing script (D-011) |
-  | Each phone model with a custom recovery | `project-os-<version>-<device>-recovery.zip` | install from the recovery (D-011) |
+  | Desktop amd64 | `luan-<version>-amd64.iso` | installer (D-010): **hybrid ISO**, boots from USB stick and DVD, UEFI and BIOS (R-26); written with Rufus, Etcher, Ventoy or `dd` |
+  | Each phone model | `luan-<version>-<device>-fastboot.zip` | images plus flashing script (D-011) |
+  | Each phone model with a custom recovery | `luan-<version>-<device>-recovery.zip` | install from the recovery (D-011) |
   | All | `SHA256SUMS` and its signature | integrity of every file, signed with the project's release key |
   No ready-made virtual machine images (the user's choice): in a VM the system is
   installed from the `.iso`, like on a PC. The `.wic` image stays a development output
@@ -1204,16 +1206,16 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Desktop ISO (proposed):** GRUB for both UEFI (an EFI system partition image inside
   the ISO) and BIOS (El Torito), MBR and GPT for USB booting, made with `xorriso`; the
   medium starts only what the wizard needs (D-010) and no live session (R-19). Secure
-  Boot with project-os keys in Phase 8 (D-009).
+  Boot with Luán keys in Phase 8 (D-009).
 - **Phones (proposed):** the fastboot package flashes the boot images with the vendor
   kernel (D-014), the system image and the verified-boot metadata (`vbmeta`); on models
   that allow a custom verified-boot key (Pixels: `avb_custom_key`), the package installs
-  the project's key, so the bootloader can be locked again with project-os on it. The
+  the project's key, so the bootloader can be locked again with Luán on it. The
   flashing script is POSIX `sh` (Linux and macOS); for Windows, the plain `fastboot`
   commands in the guide, or a script if a language for it is added to AGENTS.md §7.
-- **Where:** GitHub Releases of `aptecstudio/project-os` (proposed); the release key
+- **Where:** GitHub Releases of `aptecstudio/luan` (proposed); the release key
   stays outside the repository (AGENTS.md §4).
-- **Why:** R-42: users must be able to install project-os without building it.
+- **Why:** R-42: users must be able to install Luán without building it.
 
 ### D-057 — One-command setup of a build host · `confirmed` (the user's request and approval, 2026-11-14)
 - **What:** `tools/setup-host.sh` (D-028) is the only command a developer runs on a new
@@ -1269,7 +1271,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   Secure Boot; the **development image behaves like the release** (it asks the
   password too); every slot gets **3 boot attempts**, given back at every boot that
   completes.
-- **`project-os-data-key`** (`project-os-storage`, POSIX sh): `status`, `setup`,
+- **`luan-data-key`** (`luan-storage`, POSIX sh): `status`, `setup`,
   `password`, `recovery-key`.
   - `setup`: recovery key from `systemd-cryptenroll --recovery-key` (unlocking with the
     empty key), shown and typed back to confirm it was saved (dashes, spaces and case
@@ -1296,9 +1298,9 @@ Set by the user (2026-11-11 to 2026-11-13).
   Argon2id derivation of the password slot, about 1.9 s at every boot (QEMU). Kept
   while the partition is created with an empty key; to be removed when the setup of
   Phase 8 creates it with the password.
-- **3 boot attempts per slot** (`project-os-grub.cfg`, `X_LEFT` in `grubenv`): GRUB uses
+- **3 boot attempts per slot** (`luan-grub.cfg`, `X_LEFT` in `grubenv`): GRUB uses
   one attempt at every boot of a slot; the third sets `X_TRY=1` and the slot is given
-  up after it. `rauc-mark-good` clears `X_TRY` and `project-os-boot-attempts`
+  up after it. `rauc-mark-good` clears `X_TRY` and `luan-boot-attempts`
   (`ExecStartPost`, `rauc-conf`) puts `X_LEFT` back to 3. An empty or `0` count with
   `X_TRY=0`, as after an installation, counts as 3. Why: with one attempt, a PC
   switched off at the password prompt fell back to the previous version and the
@@ -1332,7 +1334,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 ### D-059 — BIOS boot with GRUB in the same disk image (step 4e) · `confirmed` (the user's approval, 2026-11-14)
 - **What:** the disk that boots from UEFI also boots from a legacy BIOS (R-26), with the
   same `grub.cfg`, `grubenv`, slots and boot files on the EFI partition.
-  `project_os_bios_boot.bbclass` runs `files/bios/project-os-bios-boot` at the end of
+  `luan_bios_boot.bbclass` runs `files/bios/luan-bios-boot` at the end of
   `IMAGE_CMD:wic`, before the `.wic.bmap` map is made:
   - `core.img` built with `grub-mkimage -O i386-pc` (modules of `grub-native`) with only
     the modules the menu needs on BIOS: `biosdisk part_gpt fat normal configfile echo
@@ -1365,7 +1367,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   MBR entry is marked active.
 - **Checks done (QEMU, 2026-11-14, window visible):** new disk from SeaBIOS: no EFI
   firmware (`/sys/firmware/efi` missing), GRUB menu without the UEFI entry, slot A from
-  `/EFI/project-os/A/bzImage`, dm-verity root, encrypted data and `/etc` overlay,
+  `/EFI/luan/A/bzImage`, dm-verity root, encrypted data and `/etc` overlay,
   system `running`, `grubenv` written by GRUB on BIOS (`A_LEFT` back to 3); keys set up,
   update to B, slot B from its own `bzImage` and confirmed; B interrupted 3 times at the
   password prompt (screenshots) → A at the fourth boot, `B_TRY=1`, EFI partition clean.
@@ -1373,12 +1375,12 @@ Set by the user (2026-11-11 to 2026-11-13).
   by the script is identical, byte for byte, to the one first tested by hand.
 ### D-060 — Boot menu theme in the image, other systems found by GRUB (step 5b) · `confirmed` (the user's approval, 2026-11-14)
 - **What:**
-  - `project-os-grub-theme` recipe: the theme of `branding/grub-theme` (D-023, single
+  - `luan-grub-theme` recipe: the theme of `branding/grub-theme` (D-023, single
     source, read from outside the layer) with the Inter 4.1 fonts of the official
     release converted to `.pf2` by `grub-mkfont` (Regular 14 and 18, Medium 18,
     SemiBold 28), only ASCII, Latin-1, Latin Extended-A, punctuation and arrows;
     Inter's OFL license next to them. Deployed and copied by wic to
-    `EFI/BOOT/themes/project-os` on the EFI partition, where `grub.cfg` already looked.
+    `EFI/BOOT/themes/luan` on the EFI partition, where `grub.cfg` already looked.
   - `grub-mkfont` enabled only in `grub-native` (bbappend, with `freetype-native`): the
     GRUB of the image does not change, nothing is added to the system.
   - `grub-mkfont` names a font "<name> <style> <size>" and reads the style only from the
@@ -1441,7 +1443,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 ### D-061 — Hardware services: NetworkManager, ModemManager, BlueZ, PipeWire (step 3c) · `proposed` (2026-11-14)
 - **What (the user's request: the hardware side complete before the hardware
   session, step 6):** the services that make network, Bluetooth and audio usable,
-  in `packagegroup-project-os-services` (`meta-project-os`, shared with mobile); their
+  in `packagegroup-luan-services` (`meta-luan`, shared with mobile); their
   build options in the distribution configuration, trimmed to what is used.
   - **Network: NetworkManager** for wired, Wi‑Fi and mobile networks, with
     **wpa_supplicant** for Wi‑Fi and **ModemManager** (MBIM and QMI) for mobile
@@ -1472,7 +1474,7 @@ Set by the user (2026-11-11 to 2026-11-13).
     languages, unused, made by running each library under emulation); the BlueZ
     bbappend drops the run-time dependencies of the never-installed Python test
     scripts, which made the build compile PyGObject.
-  - **Development images only** (`kas/dev.yml`): `packagegroup-project-os-dev-tools`
+  - **Development images only** (`kas/dev.yml`): `packagegroup-luan-dev-tools`
     with `nmcli`, `iw`, `speaker-test`/`aplay`/`amixer`, `lspci`, `lsusb`, to test the
     hardware by hand; `bluetoothctl` and `wpctl` come with their services.
   - **`tools/run-qemu.sh --audio-file=FILE`:** an HD Audio sound card whose output is
@@ -1496,6 +1498,44 @@ Set by the user (2026-11-11 to 2026-11-13).
   and QEMU test (`tools/run-qemu.sh --audio-file`: wired network with DNS, ModemManager
   and BlueZ without hardware, a 440 Hz tone recorded in the WAV file) still to do.
 
+### D-062 — Final name Luán and logo · `confirmed` (the user's choice, 2026-11-22)
+- **What:**
+  - the system is called **Luán** (it settles DA-06b; "project-os" was the working
+    name). Text for people (documentation, comments, boot menu, `DISTRO_NAME`, UKI
+    titles, systemd unit descriptions) writes **Luán**;
+  - every technical name uses the ASCII form **`luan`**: layers `meta-luan` and
+    `meta-luan-desktop`, distribution `luan`, machine `luan-amd64`, recipes and files
+    `luan-*`, paths such as `/var/lib/luan` and `/EFI/luan`, variables `LUAN_*`,
+    BitBake functions and classes `luan_*` (AGENTS.md §7), host name `luan`,
+    repository `aptecstudio/luan`; messages printed by scripts start with `luan:`, and
+    the development certificates use `O=Luan` (ASCII, no `-utf8` needed);
+  - **logo:** a crescent moon with three four-pointed stars in its hollow,
+    **white** on night blue (the user asked for white instead of the first yellow
+    draft), night blue `#1B2559` on light backgrounds. The final file is
+    `branding/logo/luan-logo.svg`: the crescent is one path (outer circle minus the
+    bite circle) instead of an SVG mask, so `rsvg-convert` and any other renderer draw
+    it the same way; the middle star sits a little inside the hollow, so it does not
+    touch the tip of the crescent;
+  - **concept:** the design canvas the logo was chosen on is kept in
+    `branding/concept/` (`canvas.json` and one `.dc.html` file per artboard: main
+    logo with the wordmark, and dark, light, monochrome and app icon variants). Its
+    wordmark uses the Outfit font (light weight); the boot menu keeps Inter (D-023)
+    until the visual style of Phase 5 decides the system fonts. On the smallest app
+    icons the small stars are dropped (one star at 48 px, the crescent alone at
+    24 px), so the mark stays readable.
+- **Why:** the user's choice. The accented letter is kept only where people read it:
+  file names, package names, host names, variables and URLs must stay ASCII, and one
+  form everywhere (`luan`) avoids mixing `luan`, `luán` and `lu-an`.
+- **Not renamed:** the `project-os/2.54` branch of the WebKit fork (D-019), which
+  already exists; the next branches follow `luan/<version>`.
+- **Effects of the rename:** the development keys moved from
+  `~/.config/project-os/keys` to `~/.config/luan/keys`; on a build host prepared
+  before the rename, `tools/setup-host.sh` installs `/etc/sysctl.d/60-luan-bitbake.conf`
+  and the old `60-project-os-bitbake.conf` can be deleted; a build directory made
+  before the rename rebuilds the recipes whose names, distribution or machine changed.
+- **Discarded alternatives:** `luan-os` as the technical name (longer, and the project
+  needs no suffix to be told apart); `luán` in identifiers (not valid in most of them).
+
 ---
 
 ## 3. Visual style
@@ -1514,7 +1554,8 @@ First reading of the traits to combine, to be confirmed in Phase 5:
   bold typography, gestures.
 
 **Starting point (from the boot theme, D-023; provisional):**
-- Background `#0B0D12`, glow `#2A2F6B`. Logo and brand: **monochrome white** `#FFFFFF`.
+- Background `#0B0D12`, glow `#2A2F6B`. Logo and brand: **monochrome white** `#FFFFFF`;
+  on light backgrounds, night blue `#1B2559` (D-062).
 - Main text `#F2F4F8`, secondary `#9AA3B2`, dimmed `#7D8597`, minimal `#596173`.
 - Font: Inter. Radius of selectable elements: 10 px.
 
@@ -1523,20 +1564,20 @@ First reading of the traits to combine, to be confirmed in Phase 5:
 ## 4. Code structure (proposed)
 
 ```
-project-os/
+luan/
 ├── AGENTS.md  MEMORY.md  ROADMAP.md
 ├── README.md     # project presentation (requested by the user on 2026-11-11)
 ├── layers/       # Yocto layers (D-012)
-│   ├── meta-project-os/          # common user space: recipes, images, GRUB theme
-│   ├── meta-project-os-desktop/  # amd64 hardware layer: mainline kernel, Mesa, firmware
-│   ├── meta-project-os-mobile/   # common arm64 hardware layer: Halium/libhybris
-│   └── meta-device-<name>/       # one layer per phone: kernel, firmware, recovery
-│                                 # package (pixel-…, samsung-…, oppo-…)
+│   ├── meta-luan/           # common user space: recipes, images, GRUB theme
+│   ├── meta-luan-desktop/   # amd64 hardware layer: mainline kernel, Mesa, firmware
+│   ├── meta-luan-mobile/    # common arm64 hardware layer: Halium/libhybris
+│   └── meta-device-<name>/  # one layer per phone: kernel, firmware, recovery
+│                            # package (pixel-…, samsung-…, oppo-…)
 ├── kas/          # Yocto build configuration (D-024): versions, layers, machine
 ├── tools/        # development tools (e.g. checking kernel fragments)
 ├── build/        # build output (not versioned)
 ├── sources/      # external repositories fetched by kas (not versioned)
-├── branding/     # logo (placeholder), GRUB theme, generation script, previews
+├── branding/     # logo and its concept, GRUB theme, generation script, previews
 ├── runtime/      # app host: Luau VM, `include`, `app://` resolver, `.pak` reader
 ├── framework/    # graphics framework: EGL/GLES, Skia, layout, components, web view
 ├── broker/       # permission daemon and native APIs

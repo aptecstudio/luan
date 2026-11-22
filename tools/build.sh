@@ -1,9 +1,9 @@
 #!/bin/sh
-# Builds project-os for desktop amd64, in development configuration.
+# Builds Luán for desktop amd64, in development configuration.
 #
 # Usage: tools/build.sh [--low-resources] [image|update|shell]
 #   image            (default) disk image, to be tested with tools/run-qemu.sh
-#   update           signed RAUC update bundle (project-os-bundle)
+#   update           signed RAUC update bundle (luan-bundle)
 #   shell            terminal with the bitbake environment, for manual commands
 #   --low-resources  for PCs with little RAM or disk space, for example a laptop
 #                    (kas/low-resources.yml): slower build, but it fits in about 8 GB
@@ -19,7 +19,7 @@
 #   kas build kas/desktop-amd64.yml:kas/dev.yml
 #   kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml
 #
-# PROJECT_OS_LOW_RESOURCES=1 is the same as --low-resources (=0 or unset: default).
+# LUAN_LOW_RESOURCES=1 is the same as --low-resources (=0 or unset: default).
 # The development configuration (kas/dev.yml) allows passwordless root login: never use
 # it for images to be distributed (AGENTS.md §5.6).
 set -eu
@@ -30,7 +30,7 @@ usage() {
     sed -n '4,11s/^# \{0,1\}//p' "$0"
 }
 
-low="${PROJECT_OS_LOW_RESOURCES:-0}"
+low="${LUAN_LOW_RESOURCES:-0}"
 target=image
 for arg in "$@"; do
     case "$arg" in
@@ -51,10 +51,10 @@ if ! command -v kas >/dev/null 2>&1; then
     exit 1
 fi
 
-: "${PROJECT_OS_KEYS:=$HOME/.config/project-os/keys}"
-export PROJECT_OS_KEYS
-if [ ! -f "$PROJECT_OS_KEYS/ca.cert.pem" ]; then
-    echo "Keys not found in $PROJECT_OS_KEYS." >&2
+: "${LUAN_KEYS:=$HOME/.config/luan/keys}"
+export LUAN_KEYS
+if [ ! -f "$LUAN_KEYS/ca.cert.pem" ]; then
+    echo "Keys not found in $LUAN_KEYS." >&2
     echo "Create them with tools/gen-dev-keys.sh (or tools/setup-host.sh)." >&2
     exit 1
 fi
@@ -109,6 +109,6 @@ fi
 
 case "$target" in
     image)  exec kas build "$CONFIG" ;;
-    update) exec kas build --target project-os-bundle "$CONFIG" ;;
+    update) exec kas build --target luan-bundle "$CONFIG" ;;
     shell)  exec kas shell "$CONFIG" ;;
 esac

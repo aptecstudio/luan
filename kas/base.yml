@@ -1,4 +1,4 @@
-# project-os — common build configuration (kas, D-024)
+# Luán — common build configuration (kas, D-024)
 #
 # Pins the exact versions of bitbake and OpenEmbedded-Core (Yocto 6.0 "Wrynose", LTS)
 # and enables the common user-space layer. Not used on its own: it is included from a
@@ -7,14 +7,14 @@
 header:
   version: 14
 
-distro: project-os
-target: project-os-image-base
+distro: luan
+target: luan-image-base
 
 repos:
   # This repository: our layers
-  project-os:
+  luan:
     layers:
-      layers/meta-project-os:
+      layers/meta-luan:
 
   openembedded-core:
     url: https://git.openembedded.org/openembedded-core
@@ -57,11 +57,11 @@ repos:
 
 # Keys to sign and verify updates (D-026). They stay OUTSIDE the repository
 # (AGENTS.md §4). For development, generate them with tools/gen-dev-keys.sh:
-#   export PROJECT_OS_KEYS=~/.config/project-os/keys
+#   export LUAN_KEYS=~/.config/luan/keys
 # The directory holds: ca.cert.pem (verification, goes into the image), signing.key.pem
 # and signing.cert.pem (signing of update bundles).
 env:
-  PROJECT_OS_KEYS: null
+  LUAN_KEYS: null
 
 local_conf_header:
   base: |
@@ -72,5 +72,5 @@ local_conf_header:
     # one pinned in the recipe; if the archive is older, bitbake fetches only the
     # missing commits from the git server (D-035).
     PREMIRRORS:prepend = "git://git.yoctoproject.org/.* https://downloads.yoctoproject.org/mirror/sources/ "
-    RAUC_KEY_FILE = "${PROJECT_OS_KEYS}/signing.key.pem"
-    RAUC_CERT_FILE = "${PROJECT_OS_KEYS}/signing.cert.pem"
+    RAUC_KEY_FILE = "${LUAN_KEYS}/signing.key.pem"
+    RAUC_CERT_FILE = "${LUAN_KEYS}/signing.cert.pem"

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Prepares a machine to build and test project-os, with one command (D-028, D-057).
+# Prepares a machine to build and test Luán, with one command (D-028, D-057).
 #
 # Usage: tools/setup-host.sh [--yes] [--help]
 #   --yes    answer "yes" to every question, for unattended setups (on Ubuntu this
@@ -15,7 +15,7 @@
 #   - what branding/tools/render.py needs: rsvg-convert, Pillow, NumPy, Inter (apt);
 #   - kas (build tool, D-024) and the code style tools of tools/lint.sh (ShellCheck,
 #     ruff, oelint-adv), through pipx, in ~/.local/bin;
-#   - the development keys to sign updates, in ~/.config/project-os/keys (outside the
+#   - the development keys to sign updates, in ~/.config/luan/keys (outside the
 #     repository, AGENTS.md §4).
 # Then it checks that every tool works and that the repository sits on a file system
 # where Yocto can build, and prints what is still missing.
@@ -98,7 +98,7 @@ if [ "$fs_ok" -eq 0 ]; then
     echo "  $repo_dir"
     echo "The setup goes on, but the build will not work from here. Afterwards, clone"
     echo "the project into a Linux file system (ext4, btrfs, xfs), for example:"
-    echo "  git clone https://github.com/aptecstudio/project-os.git ~/project-os"
+    echo "  git clone https://github.com/aptecstudio/luan.git ~/luan"
 fi
 
 say "sudo is needed to install the system packages"
@@ -150,11 +150,11 @@ if [ -r "$userns_restriction" ] && [ "$(cat "$userns_restriction")" = "1" ]; the
     say "User namespaces restricted by AppArmor"
     echo "Bitbake needs user namespaces to isolate compilation from the network."
     echo "I can allow them permanently on this machine"
-    echo "(/etc/sysctl.d/60-project-os-bitbake.conf). It slightly reduces app isolation"
+    echo "(/etc/sysctl.d/60-luan-bitbake.conf). It slightly reduces app isolation"
     echo "on the build host: fine on a dedicated VM, less so on an everyday PC."
     if ask "Allow user namespaces?"; then
         echo "kernel.apparmor_restrict_unprivileged_userns = 0" |
-            sudo tee /etc/sysctl.d/60-project-os-bitbake.conf >/dev/null
+            sudo tee /etc/sysctl.d/60-luan-bitbake.conf >/dev/null
         sudo sysctl --system >/dev/null
     else
         echo "Not changed: the build may stop with namespace errors."
@@ -172,7 +172,7 @@ if ! git -C "$repo_dir" rev-parse --git-dir >/dev/null 2>&1; then
     fi
 fi
 
-keys_dir="$HOME/.config/project-os/keys"
+keys_dir="$HOME/.config/luan/keys"
 say "Development keys for updates"
 if [ -f "$keys_dir/ca.cert.pem" ]; then
     echo "Already present in $keys_dir"

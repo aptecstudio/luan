@@ -1,0 +1,34 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-22T10:00:00Z"
+  },
+  "title": "Luán logo",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 720,
+      "title": "Main logo"
+    },
+    "Variants.dc.html": {
+      "x": 0,
+      "y": 840,
+      "w": 1200,
+      "h": 460,
+      "title": "Variants"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Variants.dc.html"
+  ],
+  "notes": {},
+  "designSystems": []
+}

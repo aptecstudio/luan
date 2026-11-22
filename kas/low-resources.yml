@@ -1,4 +1,4 @@
-# project-os — settings for build hosts with few resources (DA-11, D-034)
+# Luán — settings for build hosts with few resources (DA-11, D-034)
 #
 # Second choice, to be enabled explicitly (D-036):
 #   tools/build.sh --low-resources

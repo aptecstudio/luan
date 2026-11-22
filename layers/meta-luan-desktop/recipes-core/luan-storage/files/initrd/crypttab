@@ -1,0 +1,5 @@
+# Luán — encrypted volumes (D-026)
+# Unlocking: first try the empty key (data not protected yet), then ask for the password
+# on the console; the recovery key is accepted at the same prompt (D-058). Works without
+# a TPM (R-25, R-27); the TPM will be added as an extra method in Phase 8.
+data  PARTLABEL=data  -  luks,discard,try-empty-password=yes

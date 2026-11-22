@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Luán logo: a crescent moon with three stars, monochrome white (D-023, D-062).
+     Single source of every logo image: branding/tools/render.py exports it to PNG.
+     The crescent is one path (outer circle minus the bite circle), not a mask, so
+     every SVG renderer draws it the same way. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Luán</title>
+  <g fill="#FFFFFF">
+    <path d="M127.8 16A112 112 0 1 0 236.6 166.6A92.9 92.9 0 0 1 127.8 16Z"/>
+    <path d="M183.4 84.2
+      C188 112.4 188 112.4 216.2 117
+      C188 121.6 188 121.6 183.4 149.8
+      C178.8 121.6 178.8 121.6 150.6 117
+      C178.8 112.4 178.8 112.4 183.4 84.2Z"/>
+    <path d="M205.2 147.1
+      C207.5 161.2 207.5 161.2 221.6 163.5
+      C207.5 165.8 207.5 165.8 205.2 179.9
+      C202.9 165.8 202.9 165.8 188.8 163.5
+      C202.9 161.2 202.9 161.2 205.2 147.1Z"/>
+    <path d="M153.3 44.6
+      C155 55.2 155 55.2 165.6 56.9
+      C155 58.6 155 58.6 153.3 69.2
+      C151.6 58.6 151.6 58.6 141 56.9
+      C151.6 55.2 151.6 55.2 153.3 44.6Z"/>
+  </g>
+</svg>
