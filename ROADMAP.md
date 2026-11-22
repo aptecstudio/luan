@@ -24,8 +24,7 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** the real hardware test session (step 6) with all the hardware checks
-together.
+**Next step:** the real hardware test session (step 6) on the user's Intel i3 laptop.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 
@@ -43,7 +42,6 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
 - [ ] **DA-05 — App package format** *(blocks Phase 3)*
   `.pak` (R-39) with a signature over the whole file, read in place: details proposed
   in D-052, to be approved.
-- [ ] **DA-06b — Final name of the system** *(not blocking; "project-os" for now)*
 - [ ] **DA-11 — Build host** *(blocks the Phase 1 checks)*
   Yocto must run on a machine of the user's (VM or physical): at least 16 GB of RAM,
   250 GB of disk, many cores. Ubuntu Server 24.04/26.04 LTS recommended. Guide and
@@ -55,15 +53,19 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
   To decide: (a) local network and Bluetooth only, or also a relay service for distant
   devices, and in that case hosted by whom (the user themselves, the project);
   (b) network discovery with mDNS (re-enabling `zeroconf`) or with an own announcement;
-  (c) compatibility with devices that do not run project-os (e.g. the KDE Connect
-  protocol for Android and Linux) or an ecosystem reserved to project-os only;
+  (c) compatibility with devices that do not run Luán (e.g. the KDE Connect
+  protocol for Android and Linux) or an ecosystem reserved to Luán only;
   (d) order of the features listed in D-033.
 
 ---
 
 ## Phase 0 — Foundations and decisions · `in progress`
 
-- [x] Repository `project-os` with main branch `main`, GPL-3.0 license (D-020)
+- [x] Repository `luan` with main branch `main`, GPL-3.0 license (D-020)
+- [x] Final name **Luán** and logo, a crescent moon with two stars; every name in the
+      repository updated (D-062)
+- [ ] Rename the GitHub repository from `aptecstudio/project-os` to `aptecstudio/luan`
+      (the links in the repository already point to the new name, D-062)
 - [x] Governance documents: `AGENTS.md`, `MEMORY.md`, `ROADMAP.md`
 - [x] Architecture decided and approved: system built from source with Yocto, Rust,
       own compositor, mediated root, immutable A/B updates (D-005…D-022)
@@ -83,7 +85,7 @@ with boot menu, A/B partitions and full hardware support.
 
 **Steps:**
 - [x] 1. Configure Yocto 6.0 "Wrynose" (LTS) with kas and create the
-      `meta-project-os` and `meta-project-os-desktop` layers (D-012, D-024); bitbake
+      `meta-luan` and `meta-luan-desktop` layers (D-012, D-024); bitbake
       reads the configuration without errors. Confirmed by the first full build
       (2026-11-11).
 - [x] 2. Minimal image: Linux 6.18 LTS kernel, glibc, systemd; boot in QEMU/UEFI up to a
@@ -91,11 +93,17 @@ with boot menu, A/B partitions and full hardware support.
   - [x] 2a. Image recipe, machine and partition layout written
   - [x] 2b. First build and boot in QEMU on the build host (laptop, D-034)
 - [x] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
-      GPU) and firmware from linux-firmware, each with its reason (R-04, D-025)
+      GPU) and firmware from linux-firmware, each with its reason (R-04, D-025); the
+      services that make it usable
   - [x] 3a. Intel SOF audio firmware recipe (`sof-bin` 2026.09.2, D-039); listening
         test in step 6
   - [x] 3b. Intel microcode recipe, early microcode loading (with step 4c.1, D-043);
         real check in step 6.17
+  - [x] 3c. Hardware services (the user's request: before the hardware session):
+        NetworkManager with wpa_supplicant and ModemManager (wired, Wi‑Fi, mobile
+        broadband, phone tethering), BlueZ, PipeWire with WirePlumber; command-line
+        test tools in development images; sound card in `tools/run-qemu.sh` (D-061);
+        built and tested in QEMU (2026-11-22)
 - [x] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
@@ -112,15 +120,15 @@ with boot menu, A/B partitions and full hardware support.
     - [x] 4c.4 UKI per slot on the EFI partition (two profiles, @0 slot A and @1 slot
           B), plus separate kernel + initramfs for BIOS boot; lz4hc slots (D-048)
   - [x] 4d. Data unlocking: password and recovery key (without TPM, R-27), set with
-        `project-os-data-key`; memory of the key derivation limited for old PCs; 3
+        `luan-data-key`; memory of the key derivation limited for old PCs; 3
         boot attempts per slot, so a PC switched off at the password prompt does not
         fall back (D-058). TPM as an extra method in Phase 8
   - [x] 4e. BIOS boot with GRUB in the same image (R-26): `boot.img` and `core.img`
         written after wic, same menu and slots as UEFI, `tools/run-qemu.sh --bios`
         (D-059); real BIOS and CSM firmwares in step 6.2
 - [x] 5. GRUB boot menu (D-009):
-  - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
-  - [x] 5b. Theme in the image: `project-os-grub-theme` recipe with the Inter `.pf2`
+  - [x] 5a. Logo and theme in `branding/`, with preview (D-023; final logo D-062)
+  - [x] 5b. Theme in the image: `luan-grub-theme` recipe with the Inter `.pf2`
         fonts, graphical menu from UEFI and BIOS; Windows and other systems found by
         GRUB at every boot, without `os-prober` (the user's choice); no decompressor
         messages on BIOS (D-060)
@@ -141,9 +149,10 @@ with boot menu, A/B partitions and full hardware support.
       | 6.8 | Intel audio with SOF: speakers, headphones, microphones | Intel laptop, 11th generation or later | step 3a, D-039 |
       | 6.9 | AMD audio: does the laptop need SOF firmware (not available today)? | recent AMD laptop | D-039 |
       | 6.10 | HD Audio and HDMI/DisplayPort audio on desktops | desktop PC | D-025 |
-      | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database | PCs/adapters available | D-025 |
-      | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones | PCs/adapters available | D-025 |
-      | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025 |
+      | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database: connection with `nmcli` | PCs/adapters available | D-025, D-061 |
+      | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones (`bluetoothctl`), audio to the headphones | PCs/adapters available | D-025, D-061 |
+      | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025, D-061 |
+      | 6.21 | Mobile data: internet shared by a phone over USB; a USB or built-in modem, if available | phone, modem | D-061 |
       | 6.14 | Input: keyboard, I2C touchpad and touchscreen (DesignWare I2C, GPIO interrupts), laptop buttons, USB devices, USB 4/Thunderbolt | Intel and AMD laptops | D-025, D-041 |
       | 6.15 | Laptop platform: battery, AC adapter, buttons, fans, temperatures, CPU frequency | laptop | D-025 |
       | 6.16 | Disks: NVMe, SATA, USB sticks, SD card reader, NTFS and exFAT partitions | PCs available | D-025 |
@@ -171,7 +180,6 @@ with boot menu, A/B partitions and full hardware support.
 - [x] Test in QEMU of an A/B update with a RAUC bundle and of the automatic rollback to
       the previous version (2026-11-12)
 - [ ] Dual boot test in QEMU with Windows installed
-- [ ] Basic services: network, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [x] Every component with its reason recorded (AGENTS.md §5.5): inventory of the
       current image and removal of the superfluous packages (2026-11-12, D-038); to be
       kept up to date at every new package
@@ -312,7 +320,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
       technical risk on the mobile side (D-014). Fallback for web views: Igalia's WPE
       port for Android (D-051)
 - [ ] Same user space compiled for arm64, without changes
-- [ ] `meta-project-os-mobile` layer: Halium/libhybris
+- [ ] `meta-luan-mobile` layer: Halium/libhybris
 - [ ] Pixel: vendor kernel and firmware, GPU, touch, audio, Wi‑Fi, Bluetooth
 - [ ] Pixel: modem (calls, text messages, data), sensors, camera
 - [ ] Pixel release files (D-011, D-056): fastboot package with flashing script and
@@ -337,7 +345,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
       it is never unprotected; then `crypttab` stops trying the empty key (about 2 s
       at every boot, D-058); the keyboard layout chosen in the setup reaches the
       initramfs for the password prompt
-- [ ] Secure Boot with project-os keys enrolled by the user (D-009)
+- [ ] Secure Boot with Luán keys enrolled by the user (D-009)
 - [ ] TPM 2.0 as an extra unlock method of the data partition, with a policy that
       survives A/B updates; password and recovery key always kept (D-058)
 - [ ] Signing of packages and images; keys outside the repository
@@ -349,7 +357,7 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
 
 ## Phase 9 — Ecosystem: interoperability between devices · `proposed`
 
-Goal: the same user's project-os devices, desktop and mobile, work together as a single
+Goal: the same user's Luán devices, desktop and mobile, work together as a single
 ecosystem (R-33, D-033). Requires DA-12.
 
 - [ ] Protocol specification (`docs/continuity.md`): pairing, keys, end-to-end

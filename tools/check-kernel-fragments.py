@@ -9,7 +9,7 @@ For each CONFIG_X=value line it checks that:
   - the value is allowed by the type: "m" only for tristate symbols, "y"/"n" for bool
     and tristate.
 It does not check dependencies ("depends on"): the kernel recipe does that at build
-time (do_project_os_configcheck, D-041), comparing the fragments with the final
+time (do_luan_configcheck, D-041), comparing the fragments with the final
 configuration.
 
 A source tree with only the Kconfig files is enough, for example:

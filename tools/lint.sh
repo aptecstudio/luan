@@ -1,5 +1,5 @@
 #!/bin/sh
-# Checks the code style of project-os (AGENTS.md §7) with the standard tool of each
+# Checks the code style of Luán (AGENTS.md §7) with the standard tool of each
 # language. A change is complete only when this script passes.
 #
 # Usage: tools/lint.sh
