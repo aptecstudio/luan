@@ -15,7 +15,7 @@ inherit packagegroup
 RDEPENDS:${PN} = "\
     alsa-utils-amixer \
     alsa-utils-aplay \
-    alsa-utils-speakertest \
+    alsa-utils-speaker-test \
     iw \
     networkmanager-nmcli \
     pciutils \
