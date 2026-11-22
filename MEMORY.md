@@ -1460,7 +1460,13 @@ Set by the user (2026-11-11 to 2026-11-13).
     commercial license) and the ALSA plugin that routes ALSA programs to PipeWire;
     `alsa-ucm-conf` for the laptops with an audio DSP (Intel SOF, AMD ACP). No
     GStreamer, JACK, camera, Avahi, Flatpak, FFmpeg: they come with the phases that
-    use them.
+    use them. The recipes install the user units without enabling them, so the
+    `pipewire` and `wireplumber` bbappends list `pipewire.socket`, `pipewire.service`
+    and `wireplumber.service` in `SYSTEMD_SERVICE`, and `systemd.bbclass` enables them
+    with `systemctl --global`: PipeWire and WirePlumber start at every user login.
+    **PipeWire never runs for root** (upstream `ConditionUser=!root`): audio is used
+    and tested by normal users in the `audio` group, or with the seat's device access
+    once there is a graphical session.
   - **Kernel:** `wwan.cfg` (desktop): USB modems (MBIM, QMI, NCM, serial AT ports), M.2
     modems on PCIe (Qualcomm MHI, Intel XMM7360, MediaTek T7xx), internet shared by a
     phone over USB (Android RNDIS and NCM, iPhone).
@@ -1495,8 +1501,17 @@ Set by the user (2026-11-11 to 2026-11-13).
   the modem through Halium (oFono or ModemManager, Phase 7); PipeWire for apps
   (PulseAudio compatibility, GStreamer) with WebKit (Phase 2).
 - **Checks done:** dependency graph and effective build options (2026-11-14). Build
-  and QEMU test (`tools/run-qemu.sh --audio-file`: wired network with DNS, ModemManager
-  and BlueZ without hardware, a 440 Hz tone recorded in the WAV file) still to do.
+  and QEMU test (2026-11-22, `tools/run-qemu.sh --audio-file`, steps in
+  `docs/development.md`): NetworkManager connects `eth0` with name resolution;
+  ModemManager runs and finds no modem; `bluetooth.service` waits for an adapter;
+  for a user in the `audio` group, PipeWire and WirePlumber start, `wpctl` lists the
+  HD Audio card and a 440 Hz tone from `speaker-test` reaches the WAV file on both
+  channels. The test found two faults, fixed: the `alsa-utils-speaker-test` package
+  name and the user units never enabled. Real hardware in step 6 (6.8–6.13, 6.21).
+- **Still open, outside this step:** udev in the initramfs prints "Failed to flush
+  ACLs: Operation not supported" for the sound card and the optical drive at every
+  boot; harmless today (no user session in the initramfs, the system's udev sets the
+  ACLs without errors), to be understood before the graphical session (Phase 2).
 
 ### D-062 — Final name Luán and logo · `confirmed` (the user's choice, 2026-11-22)
 - **What:**

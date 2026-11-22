@@ -24,8 +24,9 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 3c, hardware services (D-061), on the `build/hw-services` branch;
-then the real hardware test session (step 6) on the user's Intel i3 laptop.
+**Next step:** confirmation of D-061 (step 3c, tested in QEMU) and merge into `main`
+together with the rename (D-062), branch `build/rename-luan`; then the real hardware
+test session (step 6) on the user's Intel i3 laptop.
 One step at a time, with the user's confirmation. Awaiting approval: the `proposed`
 details of the new application model (D-049, D-050, D-052, D-053, D-055).
 
@@ -93,17 +94,18 @@ with boot menu, A/B partitions and full hardware support.
       text terminal (D-015, D-016)
   - [x] 2a. Image recipe, machine and partition layout written
   - [x] 2b. First build and boot in QEMU on the build host (laptop, D-034)
-- [ ] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
+- [x] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
       GPU) and firmware from linux-firmware, each with its reason (R-04, D-025); the
       services that make it usable
   - [x] 3a. Intel SOF audio firmware recipe (`sof-bin` 2026.09.2, D-039); listening
         test in step 6
   - [x] 3b. Intel microcode recipe, early microcode loading (with step 4c.1, D-043);
         real check in step 6.17
-  - [ ] 3c. Hardware services (the user's request: before the hardware session):
+  - [x] 3c. Hardware services (the user's request: before the hardware session):
         NetworkManager with wpa_supplicant and ModemManager (wired, Wi‑Fi, mobile
         broadband, phone tethering), BlueZ, PipeWire with WirePlumber; command-line
-        test tools in development images; sound card in `tools/run-qemu.sh` (D-061)
+        test tools in development images; sound card in `tools/run-qemu.sh` (D-061);
+        built and tested in QEMU (2026-11-22)
 - [x] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot

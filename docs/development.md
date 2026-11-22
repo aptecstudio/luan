@@ -133,6 +133,30 @@ From the next boot the password is asked on the screen (in the QEMU window, not 
 `--text` terminal); the recovery key is accepted at the same prompt. The keyboard
 layout at that prompt is the US one, like the system's console.
 
+**Testing network, Bluetooth and audio.** Start the emulator with a sound card whose
+output is recorded: `tools/run-qemu.sh --audio-file=out.wav`. Inside the system:
+
+```sh
+nmcli device                 # eth0 connected; Wi-Fi and modems on real hardware
+ping -c 2 example.com        # network and name resolution
+mmcli -L                     # modems ("No modems were found" in the emulator)
+bluetoothctl list            # adapters (none in the emulator: the service waits)
+```
+
+PipeWire runs for each user and never for root, so audio is tested with a normal user
+in the `audio` group (in the development image, which has only `root`, create one):
+
+```sh
+adduser -D tester
+sed -i -E 's/^(audio:.*[^:])$/\1,tester/' /etc/group   # BusyBox adduser cannot do it
+loginctl enable-linger tester                          # starts the user's session
+systemd-run -M tester@ --user --wait --pipe wpctl status
+systemd-run -M tester@ --user --wait --pipe speaker-test -t sine -f 440 -l 3
+```
+
+`wpctl status` lists the sound card; the tone ends up in `out.wav`. On real hardware
+the same commands play through the speakers.
+
 ## 5. Current limitations
 
 - **Data protection by command:** until the setup of Phase 8 exists, the data
